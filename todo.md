@@ -35,3 +35,5 @@
 - [ ] Consolidated delivery: tournament creation, public registration, Supabase data layer, IBJJF/custom weigh-in, manual/automatic brackets, GitHub, and Vercel setup.
 
 - [ ] Fix Vercel production root route returning Cannot GET / after the serverless function starts.
+
+- [ ] Fix managed runtime startup failing because package start still targets dist/index.js after the multi-entry build.
