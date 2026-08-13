@@ -1,5 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
+import { selectBracketEligible } from "../shared/operationFlow";
+import { buildBracketPairs } from "../shared/bracket";
 import { selectNextMatch } from "../shared/athletePortal";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
@@ -256,17 +258,14 @@ export async function updateMatchStatus(matchId: number, status: "queued" | "cal
 export async function generateAutomaticBrackets(tournamentId: number, actorUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
-  const rows = await db.select().from(registrations).where(and(eq(registrations.tournamentId, tournamentId), eq(registrations.status, "approved"), eq(registrations.weighInStatus, "passed")));
-  const grouped = new Map<number, typeof rows>();
-  rows.forEach(row => { if (row.categoryId) grouped.set(row.categoryId, [...(grouped.get(row.categoryId) ?? []), row]); });
-  grouped.forEach(categoryRows => categoryRows.sort((a, b) => (a.seed ?? 999999) - (b.seed ?? 999999)));
+  const rows = await db.select().from(registrations).where(eq(registrations.tournamentId, tournamentId));
+  const eligibleRows = selectBracketEligible(rows as Array<typeof rows[number] & { status: "pending" | "approved" | "rejected"; weighInStatus: "pending" | "passed" | "overweight" }>);
+  const pairs = buildBracketPairs(eligibleRows);
   let created = 0;
-  await Promise.all(Array.from(grouped.entries()).map(async ([categoryId, categoryRows]) => {
-    for (let index = 0; index < categoryRows.length - 1; index += 2) {
-      await db.insert(matches).values({ tournamentId, categoryId, round: "Round 1", matchNumber: created + 1, athleteAId: categoryRows[index].athleteId, athleteBId: categoryRows[index + 1].athleteId, status: "queued" });
-      created += 1;
-    }
-  }));
+  for (const pair of pairs) {
+    await db.insert(matches).values({ tournamentId, categoryId: pair.categoryId, round: "Round 1", matchNumber: created + 1, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued" });
+    created += 1;
+  }
   await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: JSON.stringify({ created }) });
   return { success: true, created } as const;
 }

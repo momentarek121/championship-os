@@ -65,8 +65,8 @@
 
 - [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.
 - [x] Show pool assignment and category details immediately after public registration and in the organizer dashboard.
-- [ ] Make registration-to-weigh-in-to-bracket flow automatic by default, with manual override for organizers.
-- [ ] Add a fast tournament-day checklist so organizers can complete setup, check-in, weigh-in, pools, brackets, timer, scoring, and results from one workspace.
+- [x] Make registration-to-weigh-in-to-bracket flow automatic by default, with manual override for organizers. Approval queues weigh-in, passed weigh-in defines bracket eligibility, and manual pairing remains available.
+- [x] Add a fast tournament-day checklist so organizers can complete setup, check-in, weigh-in, pools, brackets, timer, scoring, and results from one workspace.
 
 - [ ] Publish the completed full tournament administration build after Supabase connectivity, tests, and production verification pass.
 - [x] Verify the final public registration URL, organizer workspace, athlete portal, and live deployment links after publishing. Production root, `/register/demo`, and `/athlete/demo` were smoke-tested with clear rendered states.
@@ -113,3 +113,11 @@
 
 - [x] Define pool/bracket readiness as approved plus passed weigh-in, with a tested pure selector for eligible registrations.
 - [x] Add progression test coverage for pending → approved/weigh-in queue → passed weigh-in → bracket eligible and overweight exclusion.
+
+- [x] Wire the real bracket-generation path to approved registrations with passed weigh-in only, with overweight/pending exclusion. The server queries tournament registrations, applies `selectBracketEligible`, groups by category, and creates matches only for eligible rows.
+- [x] Add a server-side workflow test proving pending → approved → passed weigh-in eligibility and excluding overweight athletes. `server/operationFlow.test.ts` covers the eligibility and production pairing helpers.
+- [x] Replace hardcoded checklist statuses with computed setup, check-in, timer/scoring readiness, and results signals. The overview checklist now derives each status from tournament, registration, weigh-in, match, and result state.
+
+- [x] Add a server-side pure bracket pairing helper used by `generateAutomaticBrackets` and test that pending/overweight athletes never produce match pairs. `buildBracketPairs` is used by the real mutation and tested with deterministic category/seed pairing; eligibility filtering is tested separately.
+
+- [x] Add an integrated bracket-flow test that filters mixed registrations for eligibility and then pairs only approved athletes who passed weigh-in.
