@@ -92,7 +92,7 @@
 
 - [x] Create an original dark sports navigation shell inspired by the reference layout, with centered brand, top utility links, and primary tournament navigation.
 - [x] Add a public participant/category view grouped by division and weight with approved and unapproved registration counts.
-- [ ] Add organizer operations for approving registrations, filtering categories, and moving athletes from registration to weigh-in and pools.
+- [x] Add organizer operations for approving registrations, filtering categories, and moving athletes from registration to weigh-in and pools. Approval, payment, check-in, weigh-in, pool display, and category filtering are available in the organizer desk.
 - [x] Add clear rankings, event, athlete, news/regulations, and membership destinations or intentional empty states without dead-end buttons.
 - [x] Verify the redesigned responsive experience and publish the original-branded release. Desktop public information screens, route checks, typecheck, tests, and build passed.
 
@@ -106,3 +106,10 @@
 - [ ] Smoke-test the published redesigned public routes after saving the redesign checkpoint.
 
 - [x] Add a repository QA artifact documenting mobile/tablet smoke checks for the public participant and information routes before publishing the redesign checkpoint.
+
+- [x] Make the weigh-in queue show approved registrations only and respect the selected category filter.
+- [x] Add an explicit registration-to-weigh-in queue transition so organizers can advance reviewed athletes deliberately. The organizer action is labeled `Approve & queue` and approved rows appear in the filtered weigh-in queue.
+- [x] Add verification coverage for approval → weigh-in queue → pool/bracket readiness behavior. `server/operationFlow.test.ts` covers pending/approved selection and category filtering.
+
+- [x] Define pool/bracket readiness as approved plus passed weigh-in, with a tested pure selector for eligible registrations.
+- [x] Add progression test coverage for pending → approved/weigh-in queue → passed weigh-in → bracket eligible and overweight exclusion.
