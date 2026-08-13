@@ -18,3 +18,18 @@
 - [ ] Create a private GitHub repository and push the completed project.
 - [ ] Prepare Vercel deployment configuration without committing secrets.
 - [ ] Verify the deployed application and database connection after user completes provider-side environment setup.
+
+- [ ] Rebuild the first screen around tournament creation and remove the demo-only presentation.
+- [ ] Add a public tournament registration link that stores athlete submissions in the database.
+- [ ] Add an IBJJF weigh-in configuration with configurable organization rules and scale/tolerance settings.
+- [ ] Add hybrid bracket generation with manual seeding and automatic generation options.
+- [ ] Add a visible tournament workspace and shareable tournament link.
+- [ ] Verify the public registration flow, database persistence, weigh-in rules, and bracket workflows.
+
+- [ ] Replace the current MySQL/TiDB database adapter with a Supabase-compatible PostgreSQL adapter.
+- [ ] Add Supabase SQL schema for users, tournaments, clubs, athletes, categories, registrations, mats, matches, and audit logs.
+- [ ] Add Supabase environment-variable documentation and Vercel deployment settings.
+- [ ] Verify GitHub contains the latest implementation and deployment configuration.
+- [ ] Run production tests against the Supabase-compatible build and document the user's required manual setup steps.
+
+- [ ] Consolidated delivery: tournament creation, public registration, Supabase data layer, IBJJF/custom weigh-in, manual/automatic brackets, GitHub, and Vercel setup.

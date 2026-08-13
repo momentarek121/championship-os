@@ -142,3 +142,20 @@ export async function getClubs() {
   return db ? db.select().from(clubs) : [];
 }
 
+export async function getTournamentBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(tournaments).where(eq(tournaments.registrationSlug, slug)).limit(1);
+  return result[0];
+}
+
+export async function createPublicRegistration(input: { tournamentId: number; fullName: string; email?: string; phone?: string; gender: "male" | "female"; belt: string; expectedWeight: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const athleteResult = await db.insert(athletes).values({ fullName: input.fullName, email: input.email || null, phone: input.phone || null, gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight });
+  const athleteId = athleteResult[0].insertId;
+  const code = `ATH-${String(athleteId).padStart(5, "0")}`;
+  await db.insert(registrations).values({ tournamentId: input.tournamentId, athleteId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending", accreditationCode: code });
+  return { athleteId, accreditationCode: code };
+}
+

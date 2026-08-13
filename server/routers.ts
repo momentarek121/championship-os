@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createAthleteRegistration, createTournament, getClubs, getTournamentDashboard, updateRegistrationStatus } from "./db";
+import { createAthleteRegistration, createPublicRegistration, createTournament, getClubs, getTournamentBySlug, getTournamentDashboard, updateRegistrationStatus } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -22,10 +23,20 @@ export const appRouter = router({
       return { success: true } as const;
     }),
   }),
+  publicRegistration: router({
+    bySlug: publicProcedure.input(z.object({ slug: z.string().min(3) })).query(({ input }) => getTournamentBySlug(input.slug)),
+    submit: publicProcedure.input(z.object({
+      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(),
+    })).mutation(async ({ input }) => {
+      const tournament = await getTournamentBySlug(input.slug);
+      if (!tournament) throw new Error("Tournament registration link not found");
+      return createPublicRegistration({ ...input, tournamentId: tournament.id, expectedWeight: input.expectedWeight.toFixed(2) });
+    }),
+  }),
   tournament: router({
     dashboard: protectedProcedure.query(() => getTournamentDashboard()),
     clubs: protectedProcedure.query(() => getClubs()),
-    create: protectedProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, createdBy: ctx.user.id })),
+    create: protectedProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id })),
     registerAthlete: protectedProcedure.input(z.object({
       tournamentId: z.number(),
       fullName: z.string().min(2),
