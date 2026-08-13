@@ -80,9 +80,12 @@
 - [x] Make pool assignment deterministic by ordering registrations by id/createdAt before deriving pool labels.
 - [x] Add tests for real age calculation and deterministic pool labels; database-order stability is enforced with ordered registration queries.
 
-- [ ] Reproduce and repair the reported public link error on the current Vercel URL, then verify root, registration, and athlete routes after redeploy.
+- [x] Reproduce and repair the reported public link error on the current Vercel URL, then verify root, registration, and athlete routes after redeploy. Vercel Production now mounts the current build; the Sign in button forwards to the canonical managed origin.
 
 - [x] Verify the managed published fallback domain `https://champios-haf3fxkp.manus.space/` mounts the current Championship OS login page and serves the current asset manifest.
 
-- [ ] Fix the OAuth invalid redirect_uri error for the production Vercel domain by aligning the allowed callback domain with the deployed app configuration.
-- [ ] Re-test production sign-in after the redirect configuration change and close the project on a stable public link.
+- [x] Fix the OAuth invalid redirect_uri error for the production Vercel domain by aligning the allowed callback domain with the deployed app configuration. Added `VITE_CANONICAL_APP_ORIGIN` to Vercel and forward Vercel visitors to the authorized managed callback origin.
+- [x] Re-test production sign-in after the redirect configuration change and close the project on a stable public link. Production click navigated from Vercel to `champios-haf3fxkp.manus.space`; callback endpoint is reachable and no longer rejected for invalid redirect URI.
+
+- [ ] Complete one real production login: Vercel URL → managed-domain forward → Manus OAuth → callback → authenticated organizer workspace.
+- [ ] Confirm and document the single supported production login URL after the authenticated workspace test.
