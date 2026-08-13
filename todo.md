@@ -49,3 +49,12 @@
 - [ ] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI.
 - [ ] Add a true guided setup flow covering organizer details, ruleset, divisions, mats, and registration publishing.
 - [ ] Add verification coverage for persisted weigh-in settings and setup completion.
+
+- [x] Fix the first login button so authentication starts reliably from the public site. Added the missing OAuth variables to Vercel and verified the public button renders.
+- [x] Remove public Vercel Deployment Protection/SSO so shared public links open without a Vercel login.
+- [x] Add a digital match timer with start, pause, reset, configurable duration, and visible state.
+- [ ] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state.
+- [ ] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end.
+
+- [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy.
+- [ ] Add an auth smoke test or explicit manual verification note covering login initiation and callback success.
