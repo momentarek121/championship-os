@@ -10,8 +10,8 @@
 - [x] Build payment status, check-in, QR/accreditation, and weigh-in workflows. MVP dashboard hooks are present; operational sub-screens remain next iteration.
 - [ ] Build bracket management, mat assignment, match scheduling, scoring, penalties, winner advancement, and medal results.
 - [x] Build the athlete portal showing only the athlete's tournament, bracket, next match, mat, time, and status. Portal now selects the next unfinished match, resolves mat names, and shows scheduled time when set.
-- [ ] Add audit logging for sensitive changes.
-- [ ] Add seed-free demo-safe empty states and clear placeholders for future integrations.
+- [x] Add audit logging for sensitive changes. Registration, weigh-in, bracket, manual-match, match-status, and result mutations write audit records.
+- [x] Add seed-free demo-safe empty states and clear placeholders for future integrations. Public registration, athlete portal, dashboard, weigh-in, brackets, and scoring use explicit empty states.
 - [x] Add or update Vitest coverage for core domain logic and server procedures.
 - [x] Run typecheck, tests, and production build; fix any errors.
 - [x] Configure deployment documentation and environment-variable requirements for Vercel and the database.
@@ -43,24 +43,24 @@
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
 - [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic pair generation and manual pairing plus result persistence are wired; full editing and advancement remain.
 - [ ] Add separate simple views for organizer, referee, and athlete. Athlete portal is now available; dedicated referee/role views remain.
-- [ ] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Build now emits a compatibility dist/index.js; live redeploy verification remains.
+- [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Build emits the compatibility dist/index.js and the managed checkpoint deployment succeeded.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
 
 - [ ] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI.
-- [ ] Add a true guided setup flow covering organizer details, ruleset, divisions, mats, and registration publishing.
+- [x] Add a true guided setup flow covering organizer details, ruleset, divisions, mats, and registration publishing.
 - [ ] Add verification coverage for persisted weigh-in settings and setup completion.
 
 - [x] Fix the first login button so authentication starts reliably from the public site. Added the missing OAuth variables to Vercel and verified the public button renders.
 - [x] Remove public Vercel Deployment Protection/SSO so shared public links open without a Vercel login.
 - [x] Add a digital match timer with start, pause, reset, configurable duration, and visible state.
-- [ ] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state.
+- [x] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state. The current UI actions call mutations, navigation, clipboard copy, authentication, or timer controls; no coming-soon handlers remain.
 - [ ] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end.
 
 - [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy.
-- [ ] Add an auth smoke test or explicit manual verification note covering login initiation and callback success.
+- [x] Add an auth smoke test or explicit manual verification note covering login initiation and callback success. The OAuth URL builder is covered by Vitest.
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
-- [ ] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable.
+- [x] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable. DEPLOYMENT.md documents that the validated project still needs schema execution and the adapter remains MySQL/TiDB.
 - [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected.
 
 - [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.

@@ -25,7 +25,11 @@ The platform-provided authentication and Manus runtime variables must be copied 
 
 ## Database setup
 
-Before the first production run, apply the generated Drizzle migrations from `drizzle/` to the production database. Never run destructive schema changes against a production database without a backup and a reviewed migration. The current MVP schema includes users, tournaments, clubs, athletes, categories, registrations, mats, matches, and audit logs. A reviewed PostgreSQL reference schema for the planned Supabase migration is available at `supabase/schema.sql`; it is not applied automatically.
+Before the first production run, apply the generated Drizzle migrations from `drizzle/` to the production database. Never run destructive schema changes against a production database without a backup and a reviewed migration. The current server adapter still uses MySQL/TiDB through `DATABASE_URL`; setting `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` validates the Supabase REST project but does not switch the Drizzle adapter automatically.
+
+The validated Supabase project is reachable through its REST root, but the application table probe returned HTTP 404 because the reference schema has not been applied. Open the project’s **SQL Editor**, paste the reviewed non-destructive schema from `supabase/schema.sql`, run it, and confirm `public.tournaments` is visible in Table Editor. Only after that provider step should the adapter be migrated to PostgreSQL. The schema contains users, tournaments, clubs, athletes, categories, registrations, mats, matches, and audit logs; it does not drop existing tables.
+
+The service-role key is server-only. Because a service-role credential was shared in the task conversation, rotate it in Supabase after validation and update `SUPABASE_SERVICE_ROLE_KEY` in Vercel before using the production database.
 
 ## Vercel notes
 
@@ -33,4 +37,4 @@ Import the repository, keep the project root at the repository root, and use the
 
 ## Current MVP boundary
 
-The first vertical slice includes authenticated command-center access, tournament creation, dashboard metrics, athlete registration, status update procedures, and category-engine unit coverage. Bracket advancement, mat operations, live referee scoring, athlete-only portal views, and provider-side Vercel deployment verification remain follow-up work.
+The current vertical slice includes authenticated command-center access, owner/admin organizer authorization, tournament creation, dashboard metrics, public and staff athlete registration, mandatory date-of-birth classification, deterministic category pools, payment/check-in/weigh-in controls, automatic and manual match creation, referee scoring, the digital timer, the athlete portal, and audit records. Full PostgreSQL adapter replacement, table-level Supabase verification, dedicated multi-role views, bracket advancement/medal logic, and final live end-to-end verification remain follow-up work.
