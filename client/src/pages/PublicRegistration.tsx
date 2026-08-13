@@ -12,7 +12,7 @@ import { CheckCircle2, Scale, Swords } from "lucide-react";
 export default function PublicRegistration() {
   const [, params] = useRoute("/register/:slug");
   const slug = params?.slug ?? "";
-  const tournament = trpc.publicRegistration.bySlug.useQuery({ slug }, { enabled: Boolean(slug) });
+  const tournament = trpc.publicRegistration.getBySlug.useQuery({ slug }, { enabled: Boolean(slug) });
   const submit = trpc.publicRegistration.submit.useMutation();
   const [done, setDone] = useState<string | null>(null);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", gender: "male" as "male" | "female", belt: "White", expectedWeight: "" });

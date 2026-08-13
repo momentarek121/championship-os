@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { resolveCategory } from "../shared/category";
+import { selectNextMatch } from "../shared/athletePortal";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -154,6 +155,24 @@ export async function updateTournamentWeighIn(tournamentId: number, weighInMode:
 export async function getClubs() {
   const db = await getDb();
   return db ? db.select().from(clubs) : [];
+}
+
+export async function getAthletePortal(slug: string, accreditationCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const tournament = await db.select().from(tournaments).where(eq(tournaments.registrationSlug, slug)).limit(1);
+  if (!tournament[0]) return undefined;
+  const registration = await db.select().from(registrations).where(and(eq(registrations.tournamentId, tournament[0].id), eq(registrations.accreditationCode, accreditationCode))).limit(1);
+  if (!registration[0]) return undefined;
+  const athlete = await db.select().from(athletes).where(eq(athletes.id, registration[0].athleteId)).limit(1);
+  const category = registration[0].categoryId ? await db.select().from(categories).where(eq(categories.id, registration[0].categoryId)).limit(1) : [];
+  const athleteMatches = await db.select().from(matches).where(and(eq(matches.tournamentId, tournament[0].id), eq(matches.athleteAId, registration[0].athleteId)));
+  const opponentMatches = await db.select().from(matches).where(and(eq(matches.tournamentId, tournament[0].id), eq(matches.athleteBId, registration[0].athleteId)));
+  const tournamentMats = await db.select().from(mats).where(eq(mats.tournamentId, tournament[0].id));
+  const allMatches = [...athleteMatches, ...opponentMatches].sort((a, b) => a.matchNumber - b.matchNumber);
+  const matchesWithMats = allMatches.map(match => ({ ...match, matName: tournamentMats.find(mat => mat.id === match.matId)?.name ?? "TBA" }));
+  const nextMatch = selectNextMatch(matchesWithMats);
+  return { tournament: tournament[0], registration: registration[0], athlete: athlete[0], category: category[0], nextMatch, matches: matchesWithMats };
 }
 
 export async function getTournamentBySlug(slug: string) {
