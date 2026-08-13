@@ -4,7 +4,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "functions": {
     "api/index.ts": {
-      "includeFiles": "dist/public/**"
+      "includeFiles": ["dist/**"]
     }
   },
   "routes": [
