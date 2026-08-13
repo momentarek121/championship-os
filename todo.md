@@ -43,7 +43,7 @@
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
 - [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic pair generation and manual pairing plus result persistence are wired; full editing and advancement remain.
 - [ ] Add separate simple views for organizer, referee, and athlete. Athlete portal is now available; dedicated referee/role views remain.
-- [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Build emits the compatibility dist/index.js and the managed checkpoint deployment succeeded.
+- [ ] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. The compatibility dist/index.js build is fixed, but egyptbjj.vercel.app still serves an older asset and needs a provider redeploy.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
 
 - [ ] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI.
@@ -56,7 +56,7 @@
 - [x] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state. The current UI actions call mutations, navigation, clipboard copy, authentication, or timer controls; no coming-soon handlers remain.
 - [ ] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end.
 
-- [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy.
+- [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy. Current live root still serves a stale bundle.
 - [x] Add an auth smoke test or explicit manual verification note covering login initiation and callback success. The OAuth URL builder is covered by Vitest.
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
