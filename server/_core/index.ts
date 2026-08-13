@@ -2,6 +2,7 @@ import "dotenv/config";
 import { createServer } from "http";
 import net from "net";
 import { createApp } from "../app";
+import { setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -19,6 +20,7 @@ const app = createApp();
 if (!process.env.VERCEL) {
   void (async () => {
     const server = createServer(app);
+    await setupVite(app, server);
     const preferredPort = parseInt(process.env.PORT || "3000");
     const port = await findAvailablePort(preferredPort);
     server.listen(port, () => console.log(`Server running on http://localhost:${port}/`));
