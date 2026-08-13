@@ -6,7 +6,9 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import PublicRegistration from "./pages/PublicRegistration";
-import AthletePortal from "./pages/AthletePortal";
+import AthletePortal from "@/pages/AthletePortal";
+import PublicParticipants from "@/pages/PublicParticipants";
+import PublicInfo from "@/pages/PublicInfo";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -15,6 +17,12 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/register/:slug"} component={PublicRegistration} />
       <Route path={"/athlete/:slug"} component={AthletePortal} />
+      <Route path={"/event/:slug/participants"} component={PublicParticipants} />
+      <Route path={"/rankings"}>{() => <PublicInfo section="rankings" />}</Route>
+      <Route path={"/athletes"}>{() => <PublicInfo section="athletes" />}</Route>
+      <Route path={"/membership"}>{() => <PublicInfo section="membership" />}</Route>
+      <Route path={"/news"}>{() => <PublicInfo section="news" />}</Route>
+      <Route path={"/regulations"}>{() => <PublicInfo section="regulations" />}</Route>
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

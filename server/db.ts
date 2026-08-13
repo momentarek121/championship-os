@@ -190,6 +190,32 @@ export async function getTournamentBySlug(slug: string) {
   return result[0];
 }
 
+export async function getPublicParticipants(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const tournament = await getTournamentBySlug(slug);
+  if (!tournament) return undefined;
+  const [categoryRows, registrationRows, athleteRows] = await Promise.all([
+    db.select().from(categories).where(eq(categories.tournamentId, tournament.id)).orderBy(asc(categories.id)),
+    db.select().from(registrations).where(eq(registrations.tournamentId, tournament.id)).orderBy(asc(registrations.id)),
+    db.select().from(athletes).orderBy(asc(athletes.id)),
+  ]);
+  const athleteById = new Map(athleteRows.map(athlete => [athlete.id, athlete]));
+  const grouped = categoryRows.map(category => {
+    const rows = registrationRows.filter(row => row.categoryId === category.id);
+    const approved = rows.filter(row => row.status === "approved");
+    const unapproved = rows.filter(row => row.status !== "approved");
+    return {
+      category,
+      approvedCount: approved.length,
+      unapprovedCount: unapproved.length,
+      approved: approved.map(row => ({ id: row.id, athleteId: row.athleteId, name: athleteById.get(row.athleteId)?.fullName ?? `Athlete #${row.athleteId}`, pool: poolLabel(Math.floor(rows.indexOf(row) / 4)) })),
+      unapproved: unapproved.map(row => ({ id: row.id, athleteId: row.athleteId, name: athleteById.get(row.athleteId)?.fullName ?? `Athlete #${row.athleteId}` })),
+    };
+  });
+  return { tournament, categories: grouped };
+}
+
 export async function createPublicRegistration(input: { tournamentId: number; fullName: string; email?: string; phone?: string; dateOfBirth: string; gender: "male" | "female"; belt: string; expectedWeight: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");

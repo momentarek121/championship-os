@@ -89,3 +89,20 @@
 
 - [ ] Complete one real production login: Vercel URL → managed-domain forward → Manus OAuth → callback → authenticated organizer workspace.
 - [ ] Confirm and document the single supported production login URL after the authenticated workspace test.
+
+- [x] Create an original dark sports navigation shell inspired by the reference layout, with centered brand, top utility links, and primary tournament navigation.
+- [x] Add a public participant/category view grouped by division and weight with approved and unapproved registration counts.
+- [ ] Add organizer operations for approving registrations, filtering categories, and moving athletes from registration to weigh-in and pools.
+- [x] Add clear rankings, event, athlete, news/regulations, and membership destinations or intentional empty states without dead-end buttons.
+- [x] Verify the redesigned responsive experience and publish the original-branded release. Desktop public information screens, route checks, typecheck, tests, and build passed.
+
+- [x] Wire the participant-page primary navigation to the real rankings, athletes, membership, news, and regulations routes.
+- [x] Replace social/utility `href="#"` placeholders with real destinations or clearly non-interactive unavailable states.
+
+- [x] Verify the new public participant and information pages at mobile and tablet widths and fix any layout/navigation issues found. `/event/demo/participants`, `/rankings`, `/news`, `/regulations`, and `/membership` were checked at mobile 390px and tablet 768px; the participant route now has a timeout-safe unavailable state.
+- [ ] Save and publish a checkpoint after the AJP-inspired public shell changes, then smoke-test the published routes.
+
+- [x] Verify `/event/:slug/participants` and all public info pages at both mobile and tablet viewports, then fix any layout/navigation issues found.
+- [ ] Smoke-test the published redesigned public routes after saving the redesign checkpoint.
+
+- [x] Add a repository QA artifact documenting mobile/tablet smoke checks for the public participant and information routes before publishing the redesign checkpoint.
