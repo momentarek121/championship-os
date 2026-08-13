@@ -1,0 +1,1 @@
+ALTER TABLE `registrations` ADD `seed` int;

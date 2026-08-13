@@ -1,15 +1,19 @@
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createAthleteRegistration, createTournament, getClubs, getTournamentDashboard, updateRegistrationStatus } from "./db";
+import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getClubs, getTournamentBySlug, getTournamentDashboard, updateMatchStatus, updateRegistrationStatus, updateTournamentWeighIn } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
   sport: z.string().min(2),
   location: z.string().optional(),
-  ruleset: z.string().default("Standard"),
+  ruleset: z.string().default("IBJJF Standard"),
+  organizationName: z.string().min(2).default("Championship OS"),
+  weighInMode: z.enum(["ibjjf", "custom"]).default("ibjjf"),
+  weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/).default("0.00"),
 });
 
 export const appRouter = router({
@@ -22,10 +26,20 @@ export const appRouter = router({
       return { success: true } as const;
     }),
   }),
+  publicRegistration: router({
+    bySlug: publicProcedure.input(z.object({ slug: z.string().min(3) })).query(({ input }) => getTournamentBySlug(input.slug)),
+    submit: publicProcedure.input(z.object({
+      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(),
+    })).mutation(async ({ input }) => {
+      const tournament = await getTournamentBySlug(input.slug);
+      if (!tournament) throw new Error("Tournament registration link not found");
+      return createPublicRegistration({ ...input, tournamentId: tournament.id, expectedWeight: input.expectedWeight.toFixed(2) });
+    }),
+  }),
   tournament: router({
     dashboard: protectedProcedure.query(() => getTournamentDashboard()),
     clubs: protectedProcedure.query(() => getClubs()),
-    create: protectedProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, createdBy: ctx.user.id })),
+    create: protectedProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id })),
     registerAthlete: protectedProcedure.input(z.object({
       tournamentId: z.number(),
       fullName: z.string().min(2),
@@ -46,12 +60,19 @@ export const appRouter = router({
         clubId: input.clubId ?? null,
       },
       registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
+      sport: "Brazilian Jiu-Jitsu",
     })),
+    updateWeighIn: protectedProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
+    generateBrackets: protectedProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),
+    createManualMatch: protectedProcedure.input(z.object({ tournamentId: z.number(), categoryId: z.number(), athleteAId: z.number(), athleteBId: z.number() })).mutation(({ input, ctx }) => createManualMatch({ ...input, actorUserId: ctx.user.id })),
+    finishMatch: protectedProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0) })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
+    updateMatchStatus: protectedProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
     updateRegistration: protectedProcedure.input(z.object({
       id: z.number(),
       paymentStatus: z.enum(["unpaid", "pending", "paid", "refunded"]).optional(),
       checkInStatus: z.enum(["not_checked_in", "checked_in"]).optional(),
       weighInStatus: z.enum(["pending", "passed", "overweight"]).optional(),
+      seed: z.number().int().min(1).max(999).nullable().optional(),
       status: z.enum(["pending", "approved", "rejected"]).optional(),
     })).mutation(({ input, ctx }) => {
       const { id, ...values } = input;
