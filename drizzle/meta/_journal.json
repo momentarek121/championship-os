@@ -15,6 +15,13 @@
       "when": 1786584718408,
       "tag": "0001_special_dreaming_celestial",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786586150842,
+      "tag": "0002_mean_paibok",
+      "breakpoints": true
     }
   ]
 }
