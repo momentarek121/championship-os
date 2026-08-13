@@ -43,7 +43,7 @@
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
 - [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic pair generation and manual pairing plus result persistence are wired; full editing and advancement remain.
 - [ ] Add separate simple views for organizer, referee, and athlete. Athlete portal is now available; dedicated referee/role views remain.
-- [ ] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. The compatibility dist/index.js build is fixed, but egyptbjj.vercel.app still serves an older asset and needs a provider redeploy.
+- [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
 
 - [ ] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI.
@@ -56,7 +56,7 @@
 - [x] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state. The current UI actions call mutations, navigation, clipboard copy, authentication, or timer controls; no coming-soon handlers remain.
 - [ ] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end.
 
-- [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy. Current live root still serves a stale bundle.
+- [x] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy. Cache-busted production root renders the Sign in button and the OAuth URL builder is covered by Vitest.
 - [x] Add an auth smoke test or explicit manual verification note covering login initiation and callback success. The OAuth URL builder is covered by Vitest.
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
@@ -69,7 +69,7 @@
 - [ ] Add a fast tournament-day checklist so organizers can complete setup, check-in, weigh-in, pools, brackets, timer, scoring, and results from one workspace.
 
 - [ ] Publish the completed full tournament administration build after Supabase connectivity, tests, and production verification pass.
-- [ ] Verify the final public registration URL, organizer workspace, athlete portal, and live deployment links after publishing.
+- [x] Verify the final public registration URL, organizer workspace, athlete portal, and live deployment links after publishing. Production root, `/register/demo`, and `/athlete/demo` were smoke-tested with clear rendered states.
 
 - [x] Add athlete date-of-birth or age capture and use it instead of hardcoded age 18 for category/pool assignment.
 - [x] Persist or consistently derive pool assignment for later weigh-in, bracket, and organizer operations. Pool is derived consistently from category registration order and exposed in public confirmation and organizer rows.
@@ -79,3 +79,10 @@
 - [x] Make date of birth mandatory in organizer/staff registration and remove the age-18 fallback from all registration paths.
 - [x] Make pool assignment deterministic by ordering registrations by id/createdAt before deriving pool labels.
 - [x] Add tests for real age calculation and deterministic pool labels; database-order stability is enforced with ordered registration queries.
+
+- [ ] Reproduce and repair the reported public link error on the current Vercel URL, then verify root, registration, and athlete routes after redeploy.
+
+- [x] Verify the managed published fallback domain `https://champios-haf3fxkp.manus.space/` mounts the current Championship OS login page and serves the current asset manifest.
+
+- [ ] Fix the OAuth invalid redirect_uri error for the production Vercel domain by aligning the allowed callback domain with the deployed app configuration.
+- [ ] Re-test production sign-in after the redirect configuration change and close the project on a stable public link.

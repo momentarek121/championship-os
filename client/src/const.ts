@@ -22,10 +22,18 @@ export function buildLoginUrl(input: { oauthPortalUrl: string; appId: string; re
   return url.toString();
 }
 
+export const getCanonicalAppOrigin = () => import.meta.env.VITE_CANONICAL_APP_ORIGIN || window.location.origin;
+
 export const startLogin = () => {
+  const canonicalOrigin = getCanonicalAppOrigin().replace(/\/$/, "");
+  if (window.location.origin !== canonicalOrigin) {
+    window.location.assign(`${canonicalOrigin}${window.location.pathname}${window.location.search}`);
+    return;
+  }
+
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
+  const redirectUri = `${canonicalOrigin}/api/oauth/callback`;
   const nonce = crypto.randomUUID();
   document.cookie = `${OAUTH_STATE_COOKIE}=${nonce}; Path=/; Max-Age=600; SameSite=None; Secure`;
   window.location.href = buildLoginUrl({ oauthPortalUrl, appId, redirectUri, nonce });
