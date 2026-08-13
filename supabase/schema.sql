@@ -26,6 +26,7 @@ create table if not exists public.tournaments (
   registration_slug text not null unique,
   weigh_in_mode text not null default 'ibjjf' check (weigh_in_mode in ('ibjjf','custom')),
   weigh_in_tolerance numeric(6,2) not null default 0,
+  scale_notes text,
   created_by bigint not null references public.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

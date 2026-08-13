@@ -46,9 +46,9 @@
 - [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
 
-- [ ] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI.
+- [x] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI and persistence path.
 - [x] Add a true guided setup flow covering organizer details, ruleset, divisions, mats, and registration publishing.
-- [ ] Add verification coverage for persisted weigh-in settings and setup completion.
+- [x] Add verification coverage for persisted setup normalization, scale notes, tolerance defaults, and setup completion readiness.
 
 - [x] Fix the first login button so authentication starts reliably from the public site. Added the missing OAuth variables to Vercel and verified the public button renders.
 - [x] Remove public Vercel Deployment Protection/SSO so shared public links open without a Vercel login.
@@ -121,3 +121,4 @@
 - [x] Add a server-side pure bracket pairing helper used by `generateAutomaticBrackets` and test that pending/overweight athletes never produce match pairs. `buildBracketPairs` is used by the real mutation and tested with deterministic category/seed pairing; eligibility filtering is tested separately.
 
 - [x] Add an integrated bracket-flow test that filters mixed registrations for eligibility and then pairs only approved athletes who passed weigh-in.
+- [x] Add an organizer setup mutation and form controls that persist organization name, weigh-in mode, tolerance, and scale notes.

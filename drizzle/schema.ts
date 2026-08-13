@@ -34,6 +34,7 @@ export const tournaments = mysqlTable("tournaments", {
   registrationSlug: varchar("registrationSlug", { length: 120 }).notNull().unique(),
   weighInMode: mysqlEnum("weighInMode", ["ibjjf", "custom"]).default("ibjjf").notNull(),
   weighInTolerance: decimal("weighInTolerance", { precision: 4, scale: 2 }).default("0.00").notNull(),
+  scaleNotes: text("scaleNotes"),
   createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

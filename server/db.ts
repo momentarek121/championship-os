@@ -2,6 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
 import { buildBracketPairs } from "../shared/bracket";
+import { normalizeTournamentSettings } from "../shared/tournamentSettings";
 import { selectNextMatch } from "../shared/athletePortal";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
@@ -159,6 +160,17 @@ export async function updateTournamentWeighIn(tournamentId: number, weighInMode:
   if (!db) throw new Error("Database is not available");
   await db.update(tournaments).set({ weighInMode, weighInTolerance }).where(eq(tournaments.id, tournamentId));
   await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "weigh_in_settings", afterValue: JSON.stringify({ weighInMode, weighInTolerance }) });
+  return { success: true } as const;
+}
+
+export async function updateTournamentSettings(input: { tournamentId: number; organizationName: string; weighInMode: "ibjjf" | "custom"; weighInTolerance: string; scaleNotes: string; actorUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const existing = await db.select().from(tournaments).where(eq(tournaments.id, input.tournamentId)).limit(1);
+  if (!existing[0]) throw new Error("Tournament not found");
+  const settings = normalizeTournamentSettings(input);
+  await db.update(tournaments).set({ organizationName: settings.organizationName, weighInMode: settings.weighInMode, weighInTolerance: settings.weighInTolerance, scaleNotes: settings.scaleNotes || null }).where(eq(tournaments.id, input.tournamentId));
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "settings", beforeValue: JSON.stringify(existing[0]), afterValue: JSON.stringify(settings) });
   return { success: true } as const;
 }
 
