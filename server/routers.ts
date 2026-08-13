@@ -30,7 +30,7 @@ export const appRouter = router({
     getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(({ input }) => getTournamentBySlug(input.slug)),
     athletePortal: publicProcedure.input(z.object({ slug: z.string(), accreditationCode: z.string().min(3) })).query(({ input }) => getAthletePortal(input.slug, input.accreditationCode)),
     submit: publicProcedure.input(z.object({
-      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(),
+      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), dateOfBirth: z.string().min(1), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(),
     })).mutation(async ({ input }) => {
       const tournament = await getTournamentBySlug(input.slug);
       if (!tournament) throw new Error("Tournament registration link not found");
@@ -46,6 +46,7 @@ export const appRouter = router({
       fullName: z.string().min(2),
       email: z.string().email().optional().or(z.literal("")),
       phone: z.string().optional(),
+      dateOfBirth: z.string().min(1),
       gender: z.enum(["male", "female"]),
       belt: z.string().min(2),
       expectedWeight: z.number().positive(),
@@ -55,6 +56,7 @@ export const appRouter = router({
         fullName: input.fullName,
         email: input.email || null,
         phone: input.phone || null,
+        dateOfBirth: input.dateOfBirth ? new Date(`${input.dateOfBirth}T00:00:00Z`) : null,
         gender: input.gender,
         belt: input.belt,
         expectedWeight: input.expectedWeight.toFixed(2),

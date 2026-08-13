@@ -58,3 +58,24 @@
 
 - [ ] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy.
 - [ ] Add an auth smoke test or explicit manual verification note covering login initiation and callback success.
+
+- [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
+- [ ] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable.
+- [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected.
+
+- [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.
+- [x] Show pool assignment and category details immediately after public registration and in the organizer dashboard.
+- [ ] Make registration-to-weigh-in-to-bracket flow automatic by default, with manual override for organizers.
+- [ ] Add a fast tournament-day checklist so organizers can complete setup, check-in, weigh-in, pools, brackets, timer, scoring, and results from one workspace.
+
+- [ ] Publish the completed full tournament administration build after Supabase connectivity, tests, and production verification pass.
+- [ ] Verify the final public registration URL, organizer workspace, athlete portal, and live deployment links after publishing.
+
+- [x] Add athlete date-of-birth or age capture and use it instead of hardcoded age 18 for category/pool assignment.
+- [x] Persist or consistently derive pool assignment for later weigh-in, bracket, and organizer operations. Pool is derived consistently from category registration order and exposed in public confirmation and organizer rows.
+- [x] Show category name and pool assignment in the organizer registration table with safe empty states.
+- [ ] Apply the Championship OS schema to the validated Supabase project and verify table-level access.
+
+- [x] Make date of birth mandatory in organizer/staff registration and remove the age-18 fallback from all registration paths.
+- [x] Make pool assignment deterministic by ordering registrations by id/createdAt before deriving pool labels.
+- [x] Add tests for real age calculation and deterministic pool labels; database-order stability is enforced with ordered registration queries.
