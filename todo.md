@@ -33,3 +33,5 @@
 - [ ] Run production tests against the Supabase-compatible build and document the user's required manual setup steps.
 
 - [ ] Consolidated delivery: tournament creation, public registration, Supabase data layer, IBJJF/custom weigh-in, manual/automatic brackets, GitHub, and Vercel setup.
+
+- [ ] Fix Vercel production root route returning Cannot GET / after the serverless function starts.

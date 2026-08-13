@@ -1,2 +1,5 @@
 import { createApp } from "./app";
-export default createApp();
+
+process.env.NODE_ENV = "production";
+const app = createApp();
+export default app;
