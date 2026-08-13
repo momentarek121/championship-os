@@ -4,13 +4,16 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createAthleteRegistration, createPublicRegistration, createTournament, getClubs, getTournamentBySlug, getTournamentDashboard, updateRegistrationStatus } from "./db";
+import { createAthleteRegistration, createPublicRegistration, createTournament, finishMatch, getClubs, getTournamentBySlug, getTournamentDashboard, updateMatchStatus, updateRegistrationStatus, updateTournamentWeighIn } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
   sport: z.string().min(2),
   location: z.string().optional(),
-  ruleset: z.string().default("Standard"),
+  ruleset: z.string().default("IBJJF Standard"),
+  organizationName: z.string().min(2).default("Championship OS"),
+  weighInMode: z.enum(["ibjjf", "custom"]).default("ibjjf"),
+  weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/).default("0.00"),
 });
 
 export const appRouter = router({
@@ -57,7 +60,11 @@ export const appRouter = router({
         clubId: input.clubId ?? null,
       },
       registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
+      sport: "Brazilian Jiu-Jitsu",
     })),
+    updateWeighIn: protectedProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
+    finishMatch: protectedProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0) })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
+    updateMatchStatus: protectedProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
     updateRegistration: protectedProcedure.input(z.object({
       id: z.number(),
       paymentStatus: z.enum(["unpaid", "pending", "paid", "refunded"]).optional(),
