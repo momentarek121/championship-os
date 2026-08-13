@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,56 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function getTournamentDashboard() {
+  const db = await getDb();
+  if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
+  const [tournamentRows, athleteRows, registrationRows, matchRows] = await Promise.all([
+    db.select().from(tournaments),
+    db.select().from(athletes),
+    db.select().from(registrations),
+    db.select().from(matches),
+  ]);
+  return {
+    tournaments: tournamentRows,
+    athletes: athleteRows,
+    registrations: registrationRows,
+    matches: matchRows,
+    metrics: {
+      registered: registrationRows.length,
+      paid: registrationRows.filter(row => row.paymentStatus === "paid").length,
+      checkedIn: registrationRows.filter(row => row.checkInStatus === "checked_in").length,
+      liveMatches: matchRows.filter(row => row.status === "live").length,
+    },
+  };
+}
+
+export async function createTournament(input: typeof tournaments.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const result = await db.insert(tournaments).values(input);
+  return result[0].insertId;
+}
+
+export async function createAthleteRegistration(input: { athlete: typeof athletes.$inferInsert; registration: Omit<typeof registrations.$inferInsert, "athleteId"> }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const athleteResult = await db.insert(athletes).values(input.athlete);
+  const athleteId = athleteResult[0].insertId;
+  await db.insert(registrations).values({ ...input.registration, athleteId });
+  return athleteId;
+}
+
+export async function updateRegistrationStatus(id: number, values: Partial<typeof registrations.$inferInsert>, actorUserId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const existing = await db.select().from(registrations).where(eq(registrations.id, id)).limit(1);
+  await db.update(registrations).set(values).where(eq(registrations.id, id));
+  await db.insert(auditLogs).values({ actorUserId, entityType: "registration", entityId: id, action: "update", beforeValue: JSON.stringify(existing[0] ?? null), afterValue: JSON.stringify(values) });
+  return { success: true } as const;
+}
+
+export async function getClubs() {
+  const db = await getDb();
+  return db ? db.select().from(clubs) : [];
+}
+

@@ -1,28 +1,62 @@
+import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { createAthleteRegistration, createTournament, getClubs, getTournamentDashboard, updateRegistrationStatus } from "./db";
+
+const tournamentInput = z.object({
+  name: z.string().min(2),
+  sport: z.string().min(2),
+  location: z.string().optional(),
+  ruleset: z.string().default("Standard"),
+});
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
-
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  tournament: router({
+    dashboard: protectedProcedure.query(() => getTournamentDashboard()),
+    clubs: protectedProcedure.query(() => getClubs()),
+    create: protectedProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, createdBy: ctx.user.id })),
+    registerAthlete: protectedProcedure.input(z.object({
+      tournamentId: z.number(),
+      fullName: z.string().min(2),
+      email: z.string().email().optional().or(z.literal("")),
+      phone: z.string().optional(),
+      gender: z.enum(["male", "female"]),
+      belt: z.string().min(2),
+      expectedWeight: z.number().positive(),
+      clubId: z.number().optional(),
+    })).mutation(({ input }) => createAthleteRegistration({
+      athlete: {
+        fullName: input.fullName,
+        email: input.email || null,
+        phone: input.phone || null,
+        gender: input.gender,
+        belt: input.belt,
+        expectedWeight: input.expectedWeight.toFixed(2),
+        clubId: input.clubId ?? null,
+      },
+      registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
+    })),
+    updateRegistration: protectedProcedure.input(z.object({
+      id: z.number(),
+      paymentStatus: z.enum(["unpaid", "pending", "paid", "refunded"]).optional(),
+      checkInStatus: z.enum(["not_checked_in", "checked_in"]).optional(),
+      weighInStatus: z.enum(["pending", "passed", "overweight"]).optional(),
+      status: z.enum(["pending", "approved", "rejected"]).optional(),
+    })).mutation(({ input, ctx }) => {
+      const { id, ...values } = input;
+      return updateRegistrationStatus(id, values, ctx.user.id);
+    }),
+  }),
 });
-
 export type AppRouter = typeof appRouter;
