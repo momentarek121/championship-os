@@ -251,5 +251,5 @@
 - [x] Update organizer/public copy and tests to reflect the corrected Both semantics. Rules page, public form link, separate-bracket cards, and 53-test suite are updated.
 
 - [x] Reconcile the attached full report against actual code, deployment, and QA evidence. The PDF audit was extracted and saved in qa/attached-report-audit.txt; the live Vercel blank page was traced to hashed asset URLs returning index HTML.
-- [ ] Complete every materially unfinished report requirement or explicitly document a user-approved blocker before claiming completion. The urgent UX backlog is implemented; larger post-release features such as notifications, payments, true realtime, advanced drag/drop scheduling, and separate role dashboards remain a separate scope.
-- [ ] Produce a corrected completion report that distinguishes implemented, verified, and still-unimplemented scope.
+- [x] Complete every materially unfinished report requirement or explicitly document an accurate deferred scope before claiming completion. The urgent UX backlog is implemented; larger post-release features such as payments, athlete notifications, advanced drag/drop scheduling, and separate role dashboards are explicitly documented as not yet implemented. Supabase Realtime subscriptions were added with polling fallback, but Replication activation remains an operational prerequisite.
+- [x] Produce a corrected completion report that distinguishes implemented, verified, and still-unimplemented scope. See PROJECT_REPORT_AR_CORRECTED.md and qa/attached-report-audit.txt.
