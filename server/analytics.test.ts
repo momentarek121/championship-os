@@ -10,6 +10,24 @@ describe("tournament analytics", () => {
     ]);
   });
 
+  it("filters registrations by time window and compares competition modes", () => {
+    const now = Date.parse("2026-08-14T12:00:00Z");
+    const result = buildTournamentAnalytics(
+      [
+        { categoryCompetitionMode: "gi", createdAt: "2026-08-13T12:00:00Z" },
+        { categoryCompetitionMode: "nogi", createdAt: "2026-08-01T12:00:00Z" },
+        { categoryCompetitionMode: "both", createdAt: "2026-08-14T11:00:00Z" },
+      ],
+      [],
+      [],
+      [],
+      "7d",
+      now,
+    );
+    expect(result.totalRegistrations).toBe(2);
+    expect(result.competitionModes).toEqual([{ label: "GI", count: 1 }, { label: "No-Gi", count: 0 }, { label: "Both", count: 1 }]);
+  });
+
   it("derives registration, belt, match, and mat KPIs from rows", () => {
     const result = buildTournamentAnalytics(
       [
