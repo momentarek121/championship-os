@@ -151,3 +151,5 @@
 - [ ] Cut the managed production runtime over to SUPABASE_DATABASE_URL and verify it no longer reads the legacy MySQL/TiDB data source.
 - [ ] Re-seed the synthetic demo tournament into Supabase after the production cutover and verify organizer, brackets, referee, Results, and athlete portal data.
 - [ ] Re-run public and authenticated production smoke tests after the Supabase cutover.
+
+- [ ] Align mat status values with the live Supabase constraint (`idle`, `active`, `paused`) and re-run the demo seed plus all authenticated smoke tests.

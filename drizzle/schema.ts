@@ -36,7 +36,7 @@ export const registrations = pgTable("registrations", {
 });
 
 export const mats = pgTable("mats", {
-  id: bigint("id", { mode: "number" }).generatedByDefaultAsIdentity().primaryKey(), tournamentId: bigint("tournament_id", { mode: "number" }).notNull(), name: varchar("name", { length: 40 }).notNull(), status: text("status").$type<"available" | "live" | "paused">().notNull().default("available"), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  id: bigint("id", { mode: "number" }).generatedByDefaultAsIdentity().primaryKey(), tournamentId: bigint("tournament_id", { mode: "number" }).notNull(), name: varchar("name", { length: 40 }).notNull(), status: text("status").$type<"idle" | "active" | "paused">().notNull().default("idle"), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const matches = pgTable("matches", {

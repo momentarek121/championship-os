@@ -372,7 +372,7 @@ export async function seedDemoTournament(actorUserId: number) {
   }
   const matIds: number[] = [];
   for (const name of ["Mat 1", "Mat 2", "Mat 3", "Mat 4"]) {
-    const [createdMat] = await db.insert(mats).values({ tournamentId, name, status: name === "Mat 1" ? "live" : "available" }).returning({ id: mats.id });
+    const [createdMat] = await db.insert(mats).values({ tournamentId, name, status: name === "Mat 1" ? "active" : "idle" }).returning({ id: mats.id });
     matIds.push(createdMat.id);
   }
   let matchNumber = 1;
