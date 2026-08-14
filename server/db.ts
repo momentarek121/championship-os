@@ -2,6 +2,9 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
 import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
+import { roundLabel } from "../shared/rounds";
+import { buildMatSchedule } from "../shared/scheduler";
+import { calculateAcademyStandings } from "../shared/standings";
 import { normalizeTournamentSettings } from "../shared/tournamentSettings";
 import { selectNextMatch } from "../shared/athletePortal";
 import { canEditMatchSlots, validateMatchSlots } from "../shared/matchEditing";
@@ -112,25 +115,35 @@ export async function getUserByOpenId(openId: string) {
 
 export async function getTournamentDashboard() {
   const db = await getDb();
-  if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
-  const [tournamentRows, athleteRows, registrationRows, matchRows, categoryRows] = await Promise.all([
+  if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], mats: [], standings: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
+  const [tournamentRows, athleteRows, registrationRows, matchRows, categoryRows, matRows, clubRows] = await Promise.all([
     db.select().from(tournaments).orderBy(desc(tournaments.id)),
     db.select().from(athletes),
     db.select().from(registrations).orderBy(asc(registrations.id)),
     db.select().from(matches),
     db.select().from(categories).orderBy(asc(categories.id)),
+    db.select().from(mats).orderBy(asc(mats.id)),
+    db.select().from(clubs).orderBy(asc(clubs.id)),
   ]);
   const categoryPositions = new Map<number, number>();
+  const clubNames = new Map(clubRows.map(club => [club.id, club.name]));
+  const athleteClubs = new Map(athleteRows.map(athlete => [athlete.id, athlete.clubId ? clubNames.get(athlete.clubId) ?? null : null]));
+  const standings = calculateAcademyStandings(matchRows.filter(match => match.status === "finished" && match.winnerId != null).map(match => ({ academy: athleteClubs.get(match.winnerId!) ?? "Unattached", winner: true, medal: null })));
+
   const enrichedRegistrations = registrationRows.map(row => {
     const position = categoryPositions.get(row.categoryId ?? -1) ?? 0;
     categoryPositions.set(row.categoryId ?? -1, position + 1);
-    return { ...row, categoryName: categoryRows.find(category => category.id === row.categoryId)?.name ?? "Unassigned", pool: row.categoryId ? poolLabel(Math.floor(position / 4)) : "Unassigned" };
+    const category = categoryRows.find(category => category.id === row.categoryId);
+    return { ...row, categoryName: category?.name ?? "Unassigned", categoryWeightLimit: category?.weightLimit ?? null, categoryCompetitionMode: category?.competitionMode ?? "gi", pool: row.categoryId ? poolLabel(Math.floor(position / 4)) : "Unassigned" };
   });
   return {
     tournaments: tournamentRows,
     athletes: athleteRows,
     registrations: enrichedRegistrations,
     matches: matchRows,
+    mats: matRows,
+    clubs: clubRows,
+    standings,
     metrics: {
       registered: registrationRows.length,
       paid: registrationRows.filter(row => row.paymentStatus === "paid").length,
@@ -153,10 +166,11 @@ export async function createAthleteRegistration(input: { athlete: typeof athlete
   const tournament = await db.select().from(tournaments).where(eq(tournaments.id, input.registration.tournamentId)).limit(1);
   const sport = input.sport ?? tournament[0]?.sport ?? "Brazilian Jiu-Jitsu";
   if (!input.athlete.dateOfBirth) throw new Error("Date of birth is required for category assignment");
-  const categoryValue = resolveCategory({ age: calculateAge(input.athlete.dateOfBirth), gender: input.athlete.gender, belt: input.athlete.belt, weight: Number(input.athlete.expectedWeight), sport });
+  const competitionMode = tournament[0]?.competitionMode ?? "gi";
+  const categoryValue = resolveCategory({ age: calculateAge(input.athlete.dateOfBirth), gender: input.athlete.gender, belt: input.athlete.belt, weight: Number(input.athlete.expectedWeight), sport, competitionMode });
   const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.registration.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
   let categoryId = existingCategory[0]?.id;
-  if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.registration.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport }).returning({ id: categories.id }); categoryId = createdCategory.id; }
+  if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.registration.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport, competitionMode: categoryValue.competitionMode }).returning({ id: categories.id }); categoryId = createdCategory.id; }
   const [createdAthlete] = await db.insert(athletes).values(input.athlete).returning({ id: athletes.id });
   const athleteId = createdAthlete.id;
   await db.insert(registrations).values({ ...input.registration, athleteId, categoryId });
@@ -167,7 +181,9 @@ export async function updateRegistrationStatus(id: number, values: Partial<typeo
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   const existing = await db.select().from(registrations).where(eq(registrations.id, id)).limit(1);
-  await db.update(registrations).set(values).where(eq(registrations.id, id));
+  const { actualWeight, ...registrationValues } = values as Partial<typeof registrations.$inferInsert> & { actualWeight?: number };
+  if (Object.keys(registrationValues).length > 0) await db.update(registrations).set(registrationValues).where(eq(registrations.id, id));
+  if (actualWeight !== undefined && existing[0]?.athleteId) await db.update(athletes).set({ actualWeight: actualWeight.toFixed(2) }).where(eq(athletes.id, existing[0].athleteId));
   await db.insert(auditLogs).values({ actorUserId, entityType: "registration", entityId: id, action: "update", beforeValue: existing[0] ?? null, afterValue: values });
   return { success: true } as const;
 }
@@ -180,13 +196,15 @@ export async function updateTournamentWeighIn(tournamentId: number, weighInMode:
   return { success: true } as const;
 }
 
-export async function updateTournamentSettings(input: { tournamentId: number; organizationName: string; weighInMode: "ibjjf" | "custom"; weighInTolerance: string; scaleNotes: string; actorUserId: number }) {
+export async function updateTournamentSettings(input: { tournamentId: number; organizationName: string; weighInMode: "ibjjf" | "custom"; weighInTolerance: string; competitionMode: "gi" | "nogi" | "both"; scaleNotes: string; actorUserId: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   const existing = await db.select().from(tournaments).where(eq(tournaments.id, input.tournamentId)).limit(1);
   if (!existing[0]) throw new Error("Tournament not found");
   const settings = normalizeTournamentSettings(input);
-  await db.update(tournaments).set({ organizationName: settings.organizationName, weighInMode: settings.weighInMode, weighInTolerance: settings.weighInTolerance, scaleNotes: settings.scaleNotes || null }).where(eq(tournaments.id, input.tournamentId));
+  const beltPolicy = "Belts: No belt, White, Blue, Purple, Brown, Black; children may use organization-defined belt bands.";
+  const notes = [settings.scaleNotes, beltPolicy, `Competition mode: ${input.competitionMode === "nogi" ? "No-Gi" : input.competitionMode === "both" ? "GI + No-Gi" : "GI"}`].filter(Boolean).join(" · ");
+  await db.update(tournaments).set({ organizationName: settings.organizationName, weighInMode: settings.weighInMode, weighInTolerance: settings.weighInTolerance, competitionMode: input.competitionMode, scaleNotes: notes || null }).where(eq(tournaments.id, input.tournamentId));
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "settings", beforeValue: existing[0], afterValue: settings });
   return { success: true } as const;
 }
@@ -266,13 +284,13 @@ export async function createPublicRegistration(input: { tournamentId: number; fu
 }
 
 
-export async function finishMatch(input: { matchId: number; winnerId: number; scoreA: number; scoreB: number; actorUserId: number }) {
+export async function finishMatch(input: { matchId: number; winnerId: number; scoreA: number; scoreB: number; advantageA?: number; advantageB?: number; penaltyA?: number; penaltyB?: number; evaluation?: string; actorUserId: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   const existing = await db.select().from(matches).where(eq(matches.id, input.matchId)).limit(1);
   if (!existing[0]) throw new Error("Match not found");
   if (![existing[0].athleteAId, existing[0].athleteBId].includes(input.winnerId)) throw new Error("Winner must be one of the match athletes");
-  await db.update(matches).set({ winnerId: input.winnerId, scoreA: input.scoreA, scoreB: input.scoreB, status: "finished", finishedAt: new Date() }).where(eq(matches.id, input.matchId));
+  await db.update(matches).set({ winnerId: input.winnerId, scoreA: input.scoreA, scoreB: input.scoreB, advantageA: input.advantageA ?? 0, advantageB: input.advantageB ?? 0, penaltyA: input.penaltyA ?? 0, penaltyB: input.penaltyB ?? 0, evaluation: input.evaluation ?? null, status: "finished", finishedAt: new Date() }).where(eq(matches.id, input.matchId));
   const slot = nextBracketSlot(existing[0].round, existing[0].matchNumber);
   let advancedTo: number | null = null;
   if (slot) {
@@ -305,23 +323,29 @@ export async function generateAutomaticBrackets(tournamentId: number, actorUserI
   for (const pair of pairs) {
     const matchNumber = (categoryCounts.get(pair.categoryId) ?? 0) + 1;
     categoryCounts.set(pair.categoryId, matchNumber);
-    await db.insert(matches).values({ tournamentId, categoryId: pair.categoryId, round: "Round 1", matchNumber, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued" });
+    await db.insert(matches).values({ tournamentId, categoryId: pair.categoryId, round: roundLabel(categoryCounts.get(pair.categoryId) ?? 1), matchNumber, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued", durationMinutes: 6, delayMinutes: 0 });
     created += 1;
   }
   for (const [categoryId, firstRoundMatches] of Array.from(categoryCounts.entries())) {
     let currentRoundMatches = firstRoundMatches;
-    let roundNumber = 2;
     while (currentRoundMatches > 1) {
       const nextRoundMatches = nextRoundMatchCount(currentRoundMatches);
       for (let matchNumber = 1; matchNumber <= nextRoundMatches; matchNumber += 1) {
-        await db.insert(matches).values({ tournamentId, categoryId, round: `Round ${roundNumber}`, matchNumber, athleteAId: null, athleteBId: null, status: "queued" });
+        await db.insert(matches).values({ tournamentId, categoryId, round: roundLabel(nextRoundMatches), matchNumber, athleteAId: null, athleteBId: null, status: "queued", durationMinutes: 6, delayMinutes: 0 });
         created += 1;
       }
       currentRoundMatches = nextRoundMatches;
-      roundNumber += 1;
     }
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: { created, firstRoundMatches: pairs.length } });
+  const availableMats = await db.select().from(mats).where(eq(mats.tournamentId, tournamentId));
+  const generatedMatches = await db.select().from(matches).where(eq(matches.tournamentId, tournamentId));
+  if (generatedMatches.length > 0) {
+    const scheduled = buildMatSchedule(generatedMatches, { matCount: availableMats.length || 1, startAt: new Date(), durationMinutes: 6, transitionMinutes: 2 });
+    for (const scheduledMatch of scheduled) {
+      await db.update(matches).set({ matId: availableMats[scheduledMatch.matIndex - 1]?.id ?? null, scheduledAt: scheduledMatch.scheduledAt, durationMinutes: scheduledMatch.durationMinutes, delayMinutes: scheduledMatch.delayMinutes, schedulerOrder: scheduledMatch.schedulerOrder }).where(eq(matches.id, scheduledMatch.id));
+    }
+  }
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: { created, firstRoundMatches: pairs.length, scheduled: true } });
   return { success: true, created } as const;
 }
 
@@ -395,7 +419,17 @@ export async function seedDemoTournament(actorUserId: number) {
       await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[index % matIds.length], round: "Round 2", matchNumber: matchNumber++, athleteAId: a, athleteBId: c, scoreA: index === 0 ? 2 : 8, scoreB: index === 0 ? 0 : 6, winnerId: index === 0 ? null : a, status: index === 0 ? "queued" : "finished", finishedAt: index === 0 ? null : new Date() });
     }
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: { demo: true, divisions: divisions.map(division => division.name), athletes: names.length, recovered: !created } });
+  const demoMatches = await db.select().from(matches).where(eq(matches.tournamentId, tournamentId));
+  for (const match of demoMatches) {
+    const namedRound = match.round === "Round 1" ? "Semifinal" : match.round === "Round 2" ? "Final" : match.round;
+    if (namedRound !== match.round) await db.update(matches).set({ round: namedRound }).where(eq(matches.id, match.id));
+  }
+  const refreshedDemoMatches = await db.select().from(matches).where(eq(matches.tournamentId, tournamentId));
+  const scheduledDemoMatches = buildMatSchedule(refreshedDemoMatches, { matCount: Math.max(1, matIds.length), startAt: new Date(), durationMinutes: 6, transitionMinutes: 2 });
+  for (const scheduledMatch of scheduledDemoMatches) {
+    await db.update(matches).set({ matId: matIds[scheduledMatch.matIndex - 1] ?? null, scheduledAt: scheduledMatch.scheduledAt, durationMinutes: scheduledMatch.durationMinutes, delayMinutes: scheduledMatch.delayMinutes, schedulerOrder: scheduledMatch.schedulerOrder }).where(eq(matches.id, scheduledMatch.id));
+  }
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: { demo: true, divisions: divisions.map(division => division.name), athletes: names.length, recovered: !created, scheduled: true } });
   return { tournamentId, created, message: created ? "Demo tournament seeded" : "Demo tournament completed" } as const;
 }
 

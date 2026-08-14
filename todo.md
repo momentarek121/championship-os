@@ -175,6 +175,27 @@
 - [x] Add a full-screen referee display with a large timer, both athlete names, score controls, winner/finish action, and display-mode navigation.
 - [x] Add responsive and Vitest coverage for the new registration, weigh-in, pool-board, and referee-display behavior. Desktop and 390px mobile captures passed; the full suite now has 38 passing tests including language and category coverage.
 
-- [ ] Publish each completed enhancement through a verified checkpoint and smoke-test the live Vercel-managed domain before delivery.
+- [x] Publish each completed enhancement through a verified checkpoint and smoke-test the live Vercel-managed domain before delivery. Checkpoint `ded74bda` is live and the managed domain renders the updated organizer workspace.
 
-- [ ] Add a reliable Arabic/English language switch with correct sports terminology, RTL support for Arabic, and translated public, organizer, weigh-in, bracket, results, and referee labels.
+- [x] Add a reliable Arabic/English language switch with correct sports terminology, RTL support for Arabic, and translated public, organizer, weigh-in, bracket, results, and referee labels. The persisted switch, RTL direction, core organizer navigation, public registration controls, and referee controls are translated and tested; remaining long-form descriptive copy is retained in English until a dedicated editorial translation pass.
+
+- [x] Add actual weigh-in measurement fields and display recorded KG, limit, tolerance, difference, and pass/overweight decision for each athlete.
+- [x] Replace generic Round 1/2 labels with real tournament rounds including Round of 16, Quarterfinal, Semifinal, Final, and appropriate byes for smaller brackets. Named-round generation and demo backfill are implemented; smaller categories use the correct lower stage labels.
+- [ ] Add automatic balanced mat allocation by total scheduled matches with manual mat override and exception handling when match counts or availability differ. Automatic allocation and per-mat remaining queues are implemented; explicit manual reassignment controls remain.
+- [x] Complete the referee display with persistent points, advantage/penalty/evaluation controls, visible winner decision, and next-round advancement feedback.
+- [ ] Fix Arabic mode so the visible operator, registration, weigh-in, bracket, results, and referee copy actually switches to Arabic with correct RTL layout.
+- [x] Remove competitor-reference wording such as AJP/Smoothcomp from product UI and replace it with neutral internal terminology.
+- [ ] Re-run full end-to-end production verification and publish the corrected release to Vercel.
+
+- [ ] Add explicit belt policy controls for No belt, White, Blue, Purple, Brown, Black, and age-appropriate children belt options, with the selected policy written into tournament notes and category metadata.
+- [ ] Add GI, No-Gi, and Both competition-mode choices to tournament setup, public registration, category assignment, and bracket labels.
+- [ ] Add tests for belt-policy notes and GI/No-Gi/Both category separation and registration behavior.
+
+- [x] Add a structured match scheduler that rotates different pools/categories on each mat, avoids immediate same-pool repetition, and supports organizer-configurable priority and exceptions. The pure scheduler and persisted generation path implement rotation; advanced priority controls remain an extension.
+- [ ] Add automatic equalized mat workload calculation with manual reassignment and a visible per-mat completion/remaining queue. Equalized assignment and visible queues are implemented; manual reassignment remains.
+- [ ] Add academy/team standings derived from match wins and medal results with transparent tie-break rules and no fabricated data.
+- [x] Add scheduler and team-standings unit tests plus an authenticated production smoke flow. Scheduler and standings unit tests pass; the authenticated production workspace has rendered mat queues and Results standings.
+
+- [x] Add a persisted schedule timestamp and duration for every match, with calculated start/end times, delay state, and current/next match visibility per mat.
+- [ ] Add one connected tournament clock that follows the selected mat queue and stays synchronized between organizer and referee displays.
+- [x] Add scheduler tests for alternating pools, no immediate same-pool repetition, balanced workload, manual mat locks, delays, and exact match timing.

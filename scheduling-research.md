@@ -1,0 +1,5 @@
+# Tournament Scheduling Research
+
+The research review found recurring operational patterns across established grappling tournament workflows: organizers publish a bracket and a tentative schedule; estimated times can change; live displays show the current match order on each mat; and operators need manual assignment controls for exceptional cases. The scheduler design for Championship OS therefore uses a persisted per-match order, mat assignment, scheduled start, estimated duration, delay minutes, and a live current/next queue. It rotates pools/categories where possible to avoid putting the same pool back-to-back on one mat, while allowing a manual override when a division has priority, a competitor needs recovery time, or a mat becomes unavailable.
+
+Sources reviewed: IBJJF public event/calendar pages, a public 2026 IBJJF schedule reference, a public Grappling Industries event page describing live per-mat match order displays, and Trackwrestling event-management documentation describing manual mat assignment. These sources are used only as operational inspiration; product UI will use neutral internal terminology and will not claim to copy any named product.

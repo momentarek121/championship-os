@@ -1,4 +1,4 @@
-export type CategoryInput = { age: number; gender: "male" | "female"; belt: string; weight: number; sport: string };
+export type CategoryInput = { age: number; gender: "male" | "female"; belt: string; weight: number; sport: string; competitionMode?: "gi" | "nogi" | "both" };
 
 export function calculateAge(dateOfBirth: string | Date, now = new Date()) {
   const birth = typeof dateOfBirth === "string" ? new Date(`${dateOfBirth}T00:00:00Z`) : dateOfBirth;
@@ -12,7 +12,9 @@ export function calculateAge(dateOfBirth: string | Date, now = new Date()) {
 export function resolveCategory(input: CategoryInput) {
   const ageGroup = input.age < 13 ? "Kids" : input.age < 16 ? "Youth" : input.age < 18 ? "Teens" : input.age < 30 ? "Adult" : "Master";
   const weightLimit = input.gender === "male" ? (input.weight <= 77 ? 77 : input.weight <= 85 ? 85 : 94) : (input.weight <= 63 ? 63 : input.weight <= 70 ? 70 : 76);
-  return { ageGroup, gender: input.gender === "male" ? "Male" : "Female", belt: input.belt, weightLimit, name: `${ageGroup} / ${input.gender === "male" ? "Male" : "Female"} / ${input.belt} / -${weightLimit} KG`, sport: input.sport };
+  const competitionMode = input.competitionMode ?? "gi";
+  const modeLabel = competitionMode === "nogi" ? "No-Gi" : competitionMode === "both" ? "GI + No-Gi" : "GI";
+  return { ageGroup, gender: input.gender === "male" ? "Male" : "Female", belt: input.belt, weightLimit, competitionMode, name: `${ageGroup} / ${input.gender === "male" ? "Male" : "Female"} / ${input.belt} / ${modeLabel} / -${weightLimit} KG`, sport: input.sport };
 }
 
 export const POOL_SIZE = 4;

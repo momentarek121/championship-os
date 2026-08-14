@@ -30,3 +30,7 @@ The authenticated production Results section rendered medal placements across Ki
 ## Real public registration write/read-back
 
 With the user's confirmation, the public form submitted one synthetic registration named `QA Supabase Athlete` using non-personal QA contact data. Supabase read-back found accreditation code `ATH-00021`, status `pending`, and category `Juvenile / Male / White / -77 KG`. The public athlete portal accepted `ATH-00021` and rendered the athlete, tournament, category, pending registration/weigh-in states, and the expected no-match-yet empty state. A local helper write also succeeded for a separate QA-only record, confirming the PostgreSQL mutation path independently.
+
+## Scheduler backfill
+
+The idempotent `demo-live` recovery completed against Supabase with `created: false`, updating the existing fixture rather than duplicating it. Existing generic Round 1/2 records were normalized to named semifinal/final stages and all matches received mat queue order, scheduled start, duration, and delay metadata.

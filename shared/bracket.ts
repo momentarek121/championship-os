@@ -45,11 +45,13 @@ export function applyWinnerToNextMatch<T extends BracketMatchSlot>(matches: T[],
 }
 
 export function nextBracketSlot(round: string, matchNumber: number): { round: string; matchNumber: number; slot: BracketSlot } | null {
+  if (matchNumber < 1) return null;
+  const namedRounds: Record<string, string | null> = { "Round of 16": "Quarterfinal", Quarterfinal: "Semifinal", Semifinal: "Final", Final: null };
+  if (round in namedRounds) {
+    const nextRound = namedRounds[round];
+    return nextRound ? { round: nextRound, matchNumber: Math.ceil(matchNumber / 2), slot: matchNumber % 2 === 1 ? "athleteAId" : "athleteBId" } : null;
+  }
   const roundNumber = Number(round.match(/\d+/)?.[0] ?? 0);
-  if (!roundNumber || matchNumber < 1) return null;
-  return {
-    round: `Round ${roundNumber + 1}`,
-    matchNumber: Math.ceil(matchNumber / 2),
-    slot: matchNumber % 2 === 1 ? "athleteAId" : "athleteBId",
-  };
+  if (!roundNumber) return null;
+  return { round: `Round ${roundNumber + 1}`, matchNumber: Math.ceil(matchNumber / 2), slot: matchNumber % 2 === 1 ? "athleteAId" : "athleteBId" };
 }
