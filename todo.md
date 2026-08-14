@@ -128,3 +128,5 @@
 - [x] Add an explicitly labeled demo tournament fixture with non-production athletes across children, girls, boys, and adult divisions, plus representative pools and bracket states.
 - [x] Improve bracket presentation so organizers can inspect categories, rounds, participants, winners, and next-match progression using the demo fixture.
 - [x] Verify demo data is isolated from real registrations and publish the demo inspection release. Desktop and mobile captures passed; fixture is static and demo-labeled.
+
+- [x] Advance a finished match winner into the next queued match slot when the bracket contains a compatible next round; odd/even feeder slot mapping is covered by unit tests.

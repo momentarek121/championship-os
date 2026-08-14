@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
-import { buildBracketPairs } from "../shared/bracket";
+import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
 import { normalizeTournamentSettings } from "../shared/tournamentSettings";
 import { selectNextMatch } from "../shared/athletePortal";
 import { drizzle } from "drizzle-orm/mysql2";
@@ -255,8 +255,17 @@ export async function finishMatch(input: { matchId: number; winnerId: number; sc
   if (!existing[0]) throw new Error("Match not found");
   if (![existing[0].athleteAId, existing[0].athleteBId].includes(input.winnerId)) throw new Error("Winner must be one of the match athletes");
   await db.update(matches).set({ winnerId: input.winnerId, scoreA: input.scoreA, scoreB: input.scoreB, status: "finished", finishedAt: new Date() }).where(eq(matches.id, input.matchId));
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "finish", beforeValue: JSON.stringify(existing[0]), afterValue: JSON.stringify(input) });
-  return { success: true } as const;
+  const slot = nextBracketSlot(existing[0].round, existing[0].matchNumber);
+  let advancedTo: number | null = null;
+  if (slot) {
+    const next = await db.select().from(matches).where(and(eq(matches.tournamentId, existing[0].tournamentId), eq(matches.categoryId, existing[0].categoryId), eq(matches.round, slot.round), eq(matches.matchNumber, slot.matchNumber))).limit(1);
+    if (next[0] && next[0].status !== "finished") {
+      await db.update(matches).set({ [slot.slot]: input.winnerId }).where(eq(matches.id, next[0].id));
+      advancedTo = next[0].id;
+    }
+  }
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "finish", beforeValue: JSON.stringify(existing[0]), afterValue: JSON.stringify({ ...input, advancedTo }) });
+  return { success: true, advancedTo } as const;
 }
 
 export async function updateMatchStatus(matchId: number, status: "queued" | "called" | "live" | "no_show", actorUserId: number) {
@@ -274,11 +283,21 @@ export async function generateAutomaticBrackets(tournamentId: number, actorUserI
   const eligibleRows = selectBracketEligible(rows as Array<typeof rows[number] & { status: "pending" | "approved" | "rejected"; weighInStatus: "pending" | "passed" | "overweight" }>);
   const pairs = buildBracketPairs(eligibleRows);
   let created = 0;
+  const categoryCounts = new Map<number, number>();
   for (const pair of pairs) {
-    await db.insert(matches).values({ tournamentId, categoryId: pair.categoryId, round: "Round 1", matchNumber: created + 1, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued" });
+    const matchNumber = (categoryCounts.get(pair.categoryId) ?? 0) + 1;
+    categoryCounts.set(pair.categoryId, matchNumber);
+    await db.insert(matches).values({ tournamentId, categoryId: pair.categoryId, round: "Round 1", matchNumber, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued" });
     created += 1;
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: JSON.stringify({ created }) });
+  for (const [categoryId, firstRoundMatches] of Array.from(categoryCounts.entries())) {
+    const nextRoundMatches = nextRoundMatchCount(firstRoundMatches);
+    for (let matchNumber = 1; matchNumber <= nextRoundMatches; matchNumber += 1) {
+      await db.insert(matches).values({ tournamentId, categoryId, round: "Round 2", matchNumber, athleteAId: null, athleteBId: null, status: "queued" });
+      created += 1;
+    }
+  }
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: JSON.stringify({ created, firstRoundMatches: pairs.length }) });
   return { success: true, created } as const;
 }
 
