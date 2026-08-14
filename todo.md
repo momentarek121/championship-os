@@ -282,3 +282,6 @@
 - [x] Add a bounded timeout to public registration data loading so a stalled database request transitions to the outage state instead of remaining on Loading indefinitely. Added a five-second timeout and disabled query retries.
 - [x] Fix the homepage registration CTA so clicking it reaches the public registration route and form instead of remaining on the homepage fallback. The CTA now uses the absolute canonical URL `https://egyptbjj.vercel.app/register/demo`, so it leaves Manus Preview and stale deployment hosts.
 - [x] Diagnose and improve the Manus project preview Loading state, or clearly separate preview-only issues from the public Vercel visitor flow. The screenshot is the Manus Management UI Preview pane, not the public app; the public Vercel homepage and CTA were verified separately.
+- [ ] Remove Manus as a required organizer login dependency and provide an independent owner authentication flow.
+- [ ] Create or select a real active tournament record with a production registration URL that persists athlete submissions in Supabase.
+- [ ] Verify the complete athlete registration and organizer access flow urgently before tournament use.
