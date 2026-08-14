@@ -279,3 +279,4 @@
 - [ ] Add a direct public registration link to the homepage so athletes do not need organizer sign-in.
 - [ ] Add a clear database-outage status page/state with retry and public guidance.
 - [ ] Verify the Vercel visitor link and registration route do not require Vercel or organizer authentication.
+- [ ] Add a bounded timeout to public registration data loading so a stalled database request transitions to the outage state instead of remaining on Loading indefinitely.

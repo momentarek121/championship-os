@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,23 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function PublicRegistration() {
   const [, params] = useRoute("/register/:slug");
   const slug = params?.slug ?? "";
-  const tournament = trpc.publicRegistration.getBySlug.useQuery({ slug }, { enabled: Boolean(slug) });
+  const tournament = trpc.publicRegistration.getBySlug.useQuery({ slug }, { enabled: Boolean(slug), retry: false });
   const submit = trpc.publicRegistration.submit.useMutation();
   const { language, setLanguage, t } = useLanguage();
   const [done, setDone] = useState(false);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", dateOfBirth: "", gender: "male" as "male" | "female", belt: "White", expectedWeight: "", competitionMode: "gi" as "gi" | "nogi" | "both" });
+  useEffect(() => {
+    if (!tournament.isLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setLoadingTimedOut(true), 5000);
+    return () => window.clearTimeout(timer);
+  }, [tournament.isLoading]);
   const update = (key: string, value: string) => setForm(current => ({ ...current, [key]: value }));
-  if (tournament.isLoading) return <div className="grid min-h-screen place-items-center bg-[#07111f] text-white">Loading registration…</div>;
-  if (tournament.isError) return <div className="grid min-h-screen place-items-center bg-[#07111f] p-6 text-center text-white"><Card className="w-full max-w-lg border-0 bg-white text-slate-900 shadow-2xl"><CardContent className="p-8"><div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-amber-100 text-amber-700"><Swords className="h-7 w-7" /></div><h1 className="mt-5 text-3xl font-black">Registration temporarily unavailable</h1><p className="mt-3 leading-7 text-slate-600">The tournament database is not responding right now. Your information has not been submitted. Please retry in a moment or contact the organizer.</p><div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"><Button onClick={() => tournament.refetch()} className="rounded-xl bg-[#07111f] text-white">Retry / إعادة المحاولة</Button><Button asChild variant="outline" className="rounded-xl"><Link href="/">Back to homepage</Link></Button></div></CardContent></Card></div>;
+  if (tournament.isLoading && !loadingTimedOut) return <div className="grid min-h-screen place-items-center bg-[#07111f] text-white">Loading registration…</div>;
+  if (tournament.isError || loadingTimedOut) return <div className="grid min-h-screen place-items-center bg-[#07111f] p-6 text-center text-white"><Card className="w-full max-w-lg border-0 bg-white text-slate-900 shadow-2xl"><CardContent className="p-8"><div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-amber-100 text-amber-700"><Swords className="h-7 w-7" /></div><h1 className="mt-5 text-3xl font-black">Registration temporarily unavailable</h1><p className="mt-3 leading-7 text-slate-600">The tournament database is not responding right now. Your information has not been submitted. Please retry in a moment or contact the organizer.</p><div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"><Button onClick={() => tournament.refetch()} className="rounded-xl bg-[#07111f] text-white">Retry / إعادة المحاولة</Button><Button asChild variant="outline" className="rounded-xl"><Link href="/">Back to homepage</Link></Button></div></CardContent></Card></div>;
   if (!tournament.data) return <div className="grid min-h-screen place-items-center bg-[#07111f] p-6 text-center text-white"><div><Swords className="mx-auto mb-4 h-10 w-10 text-[#d7ff54]" /><h1 className="text-3xl font-black">Registration link not found</h1><p className="mt-3 text-slate-400">Ask the tournament organizer for the latest link.</p></div></div>;
   const event = tournament.data;
   const handleSubmit = async () => {
