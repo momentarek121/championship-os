@@ -276,12 +276,12 @@ export async function getPublicParticipants(slug: string) {
   return { tournament, categories: grouped };
 }
 
-export async function createPublicRegistration(input: { tournamentId: number; fullName: string; email?: string; phone?: string; dateOfBirth: string; gender: "male" | "female"; belt: string; expectedWeight: string }) {
+export async function createPublicRegistration(input: { tournamentId: number; fullName: string; email?: string; phone?: string; dateOfBirth: string; gender: "male" | "female"; belt: string; expectedWeight: string; competitionMode: "gi" | "nogi" | "both" }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   const tournament = await db.select().from(tournaments).where(eq(tournaments.id, input.tournamentId)).limit(1);
   if (!input.dateOfBirth) throw new Error("Date of birth is required for category assignment");
-  const categoryValue = resolveCategory({ age: calculateAge(input.dateOfBirth), gender: input.gender, belt: input.belt, weight: Number(input.expectedWeight), sport: tournament[0]?.sport ?? "Brazilian Jiu-Jitsu", competitionMode: tournament[0]?.competitionMode ?? "gi" });
+  const categoryValue = resolveCategory({ age: calculateAge(input.dateOfBirth), gender: input.gender, belt: input.belt, weight: Number(input.expectedWeight), sport: tournament[0]?.sport ?? "Brazilian Jiu-Jitsu", competitionMode: input.competitionMode });
   const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
   let categoryId = existingCategory[0]?.id;
   if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport, competitionMode: categoryValue.competitionMode }).returning({ id: categories.id }); categoryId = createdCategory.id; }

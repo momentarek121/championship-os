@@ -3,8 +3,8 @@ import { filterMatches } from "@shared/matchFilters";
 
 describe("advanced match filters", () => {
   const matches = [
-    { id: 1, athleteAId: 1, athleteBId: 2 },
-    { id: 2, athleteAId: 3, athleteBId: 4 },
+    { id: 1, athleteAId: 1, athleteBId: 2, matId: 1, round: "Semifinal" },
+    { id: 2, athleteAId: 3, athleteBId: 4, matId: 2, round: "Final" },
   ];
   const athletes = [
     { id: 1, fullName: "Ahmed Ali", belt: "Blue" },
@@ -22,4 +22,8 @@ describe("advanced match filters", () => {
   it("filters by athlete name", () => expect(filterMatches(matches, athletes, registrations, { athleteQuery: "omar" }).map(match => match.id)).toEqual([1]));
   it("filters by belt", () => expect(filterMatches(matches, athletes, registrations, { belt: "White" }).map(match => match.id)).toEqual([2]));
   it("filters by weight category and combines criteria", () => expect(filterMatches(matches, athletes, registrations, { weightCategory: "76", belt: "Blue" }).map(match => match.id)).toEqual([1]));
+  it("filters by mat and round", () => {
+    expect(filterMatches(matches, athletes, registrations, { matId: "2" }).map(match => match.id)).toEqual([2]);
+    expect(filterMatches(matches, athletes, registrations, { round: "Semifinal" }).map(match => match.id)).toEqual([1]);
+  });
 });

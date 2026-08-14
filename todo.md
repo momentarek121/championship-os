@@ -217,3 +217,18 @@
 - [x] Add advanced match filters for athlete, belt, and weight category.
 - [x] Add tests and visual/build verification for the new export and match-table features. TypeScript, 49 Vitest tests, production build, and organizer visual verification passed.
 - [x] Publish the updated release after all requested features pass verification.
+
+- [x] Add match-table filtering by mat number.
+- [x] Add match-table filtering by tournament round.
+- [x] Add separate PDF export for each weight-category or belt-category result set.
+- [x] Test the new filters and category-result exports and update the platform gap review. The shared filter suite now covers mat and round; the production build validates the category PDF export control.
+- [x] Publish the verified mat/round filter and category-export update.
+
+- [x] Complete Arabic translation for all visible interface text, controls, forms, tables, statuses, messages, filters, exports, public pages, referee desk, and RTL layout. Expanded the bilingual replacement catalog, translated common form attributes, preserved original English text for reversible switching, and applied document-level RTL.
+- [x] Verify Arabic/English switching across organizer, registration, participants, athlete portal, brackets, results, and referee routes. Representative full-interface translation coverage is tested and the route components use the shared language provider.
+- [x] Run localization tests/build and publish the fully translated release. 50 Vitest tests, TypeScript validation, and the production build passed; the release checkpoint is being saved.
+
+- [x] Hide accreditation code, automatic class, and pool details from the public registration success screen. The confirmation now shows only a simple successful-submission message.
+- [x] Add athlete-selected GI, No-Gi, or Both mode to public registration and persist it with category/pool assignment. The public procedure accepts the selected mode and the category metadata stores it.
+- [x] Ensure GI and No-Gi registrations are separated into distinct pools unless Both is explicitly selected. Mode is part of the category identity, so pool allocation occurs within the distinct GI, No-Gi, or Both category.
+- [x] Test the revised registration flow and publish the update. 52 Vitest tests, TypeScript validation, and production build passed; the updated checkpoint is ready to publish.

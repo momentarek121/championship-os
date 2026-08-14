@@ -8,6 +8,12 @@ describe("resolveCategory", () => {
   it("classifies teens and female divisions", () => {
     expect(resolveCategory({ age: 16, gender: "female", belt: "Blue", weight: 61, sport: "No-Gi" })).toMatchObject({ ageGroup: "Teens", weightLimit: 63 });
   });
+  it("keeps GI, No-Gi, and Both category labels distinct", () => {
+    const base = { age: 24, gender: "male" as const, belt: "Black", weight: 76.8, sport: "BJJ" };
+    expect(resolveCategory({ ...base, competitionMode: "gi" }).name).toContain("/ GI /");
+    expect(resolveCategory({ ...base, competitionMode: "nogi" }).name).toContain("/ No-Gi /");
+    expect(resolveCategory({ ...base, competitionMode: "both" }).name).toContain("/ GI + No-Gi /");
+  });
   it("supports a no-belt kids division", () => {
     expect(resolveCategory({ age: 10, gender: "male", belt: "No belt", weight: 29, sport: "BJJ" })).toMatchObject({ ageGroup: "Kids", belt: "No belt", name: "Kids / Male / No belt / GI / -77 KG" });
   });

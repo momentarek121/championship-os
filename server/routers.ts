@@ -35,7 +35,7 @@ export const appRouter = router({
     participants: publicProcedure.input(z.object({ slug: z.string() })).query(({ input }) => getPublicParticipants(input.slug)),
     athletePortal: publicProcedure.input(z.object({ slug: z.string(), accreditationCode: z.string().min(3) })).query(({ input }) => getAthletePortal(input.slug, input.accreditationCode)),
     submit: publicProcedure.input(z.object({
-      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), dateOfBirth: z.string().min(1), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(),
+      slug: z.string().min(3), fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), dateOfBirth: z.string().min(1), gender: z.enum(["male", "female"]), belt: z.string().min(2), expectedWeight: z.number().positive(), competitionMode: z.enum(["gi", "nogi", "both"]).default("gi"),
     })).mutation(async ({ input }) => {
       const tournament = await getTournamentBySlug(input.slug);
       if (!tournament) throw new Error("Tournament registration link not found");

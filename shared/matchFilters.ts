@@ -2,9 +2,11 @@ export type MatchFilterInput = {
   athleteQuery?: string;
   belt?: string;
   weightCategory?: string;
+  matId?: string;
+  round?: string;
 };
 
-export function filterMatches<T extends { athleteAId: number | null; athleteBId: number | null }>(matches: T[], athletes: Array<{ id: number; fullName?: string | null; belt?: string | null }>, registrations: Array<{ athleteId: number; categoryName?: string | null; categoryWeightLimit?: number | string | null }>, filters: MatchFilterInput) {
+export function filterMatches<T extends { athleteAId: number | null; athleteBId: number | null; matId?: number | null; round?: string | null }>(matches: T[], athletes: Array<{ id: number; fullName?: string | null; belt?: string | null }>, registrations: Array<{ athleteId: number; categoryName?: string | null; categoryWeightLimit?: number | string | null }>, filters: MatchFilterInput) {
   const athleteById = new Map(athletes.map(athlete => [athlete.id, athlete]));
   const registrationByAthlete = new Map(registrations.map(registration => [registration.athleteId, registration]));
   const query = filters.athleteQuery?.trim().toLowerCase() ?? "";
@@ -16,6 +18,6 @@ export function filterMatches<T extends { athleteAId: number | null; athleteBId:
     const registrationB = registrationByAthlete.get(match.athleteBId ?? -1);
     const categories = `${registrationA?.categoryName ?? ""} ${registrationA?.categoryWeightLimit ?? ""} ${registrationB?.categoryName ?? ""} ${registrationB?.categoryWeightLimit ?? ""}`;
     const belts = `${athleteA?.belt ?? ""} ${athleteB?.belt ?? ""}`;
-    return (!query || names.includes(query)) && (!filters.belt || filters.belt === "all" || belts.includes(filters.belt)) && (!filters.weightCategory || filters.weightCategory === "all" || categories.includes(filters.weightCategory));
+    return (!query || names.includes(query)) && (!filters.belt || filters.belt === "all" || belts.includes(filters.belt)) && (!filters.weightCategory || filters.weightCategory === "all" || categories.includes(filters.weightCategory)) && (!filters.matId || filters.matId === "all" || String(match.matId ?? "") === filters.matId) && (!filters.round || filters.round === "all" || match.round === filters.round);
   });
 }
