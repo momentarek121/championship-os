@@ -27,7 +27,7 @@ export function useAuth(options?: UseAuthOptions) {
       setAuthTimedOut(false);
       return;
     }
-    const timeout = window.setTimeout(() => setAuthTimedOut(true), 8000);
+    const timeout = window.setTimeout(() => setAuthTimedOut(true), 2500);
     return () => window.clearTimeout(timeout);
   }, [meQuery.isLoading]);
 
