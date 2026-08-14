@@ -1,0 +1,11 @@
+Attached PDF audit summary (14 Aug 2026, release 0fb5f7b6):
+
+The report states the core MVP is delivered: tournament creation, public registration, athlete data, GI/No-Gi/Both selection, classification, pools, weigh-in, brackets, mats, referee desk, timer, results, academy standings, exports, filters, Arabic/RTL, athlete portal, capability guards, audit log, GitHub, Vercel, and Supabase PostgreSQL.
+
+The report explicitly lists four urgent items as not yet published: visual separation of GI and No-Gi bracket boards; a pre-registration GI/No-Gi rules page; organizer editing of athlete data and status before bracket creation; and responsive phone/tablet fixes with final visual verification.
+
+The report also lists larger post-release gaps: advanced drag/drop scheduling and delay management; true realtime result/timer synchronization; full ruleset scoring and tie-break controls; separate role dashboards; visual bracket drag editor and bracket lock; SMS/WhatsApp/email notifications; payment gateway and receipts; waitlists/limits/automatic closing/child approvals/document uploads; conflict detection; final human Arabic terminology review; and post-event analytics.
+
+Current repository work after the report has implemented the four urgent items in code, plus corrected the Vercel public link and changed public Both registration to create separate GI and No-Gi registrations/categories/pools. These changes are not yet reflected in the attached PDF. Screenshot automation is unavailable, but local and Vercel route HTTP smoke checks passed, along with 53 tests, TypeScript, and production build.
+
+The remaining large gaps are not all implemented and must not be claimed as complete without additional work or explicit scope approval.

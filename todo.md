@@ -249,3 +249,7 @@
 - [x] Change public Both registration to create separate GI and No-Gi registration/category/pool records. Both now creates one athlete profile plus two unique registrations with separate mode categories, pools, and internal codes.
 - [x] Ensure GI and No-Gi brackets never share a category or match pool, including Both athletes. Added shared mode expansion and category tests; bracket grouping uses each category’s competition mode.
 - [x] Update organizer/public copy and tests to reflect the corrected Both semantics. Rules page, public form link, separate-bracket cards, and 53-test suite are updated.
+
+- [x] Reconcile the attached full report against actual code, deployment, and QA evidence. The PDF audit was extracted and saved in qa/attached-report-audit.txt; the live Vercel blank page was traced to hashed asset URLs returning index HTML.
+- [ ] Complete every materially unfinished report requirement or explicitly document a user-approved blocker before claiming completion. The urgent UX backlog is implemented; larger post-release features such as notifications, payments, true realtime, advanced drag/drop scheduling, and separate role dashboards remain a separate scope.
+- [ ] Produce a corrected completion report that distinguishes implemented, verified, and still-unimplemented scope.

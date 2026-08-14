@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts server/vercel.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && cp dist/_core/index.js dist/index.js",
+    "build": "vite build && rm -rf api/public && cp -R dist/public api/public && esbuild server/_core/index.ts server/vercel.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && cp dist/_core/index.js dist/index.js",
     "start": "NODE_ENV=production node dist/_core/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
