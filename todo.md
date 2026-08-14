@@ -155,3 +155,5 @@
 - [ ] Align mat status values with the live Supabase constraint (`idle`, `active`, `paused`) and re-run the demo seed plus all authenticated smoke tests.
 
 - [ ] Make the demo seeder recover from a partially created `demo-live` tournament instead of returning before mats and matches are completed.
+
+- [ ] Show a clear dashboard error state when the protected Supabase query fails instead of rendering `No tournament yet` over valid data or an auth/database error.
