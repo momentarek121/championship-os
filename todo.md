@@ -276,3 +276,6 @@
 - [x] Diagnose the reported blank or non-working browser experience on both egyptbjj.vercel.app and the managed fallback domain, then verify the actual rendered UI. Primary Vercel production fe483df serves a visible bilingual loading/registration fallback and valid HTML; the managed fallback hostname is not attached and returns a real 404, so it is not a usable public link.
 - [x] Resolve the repeated report that the published Vercel link still does not open or work in the user's browser, with browser-level verification after the fix. DOM-ready React mounting and public Home fail-open rendering are deployed; browser verification shows the sign-in screen.
 - [x] Fix the confirmed production Loading-screen loop shown in the user's browser screenshot, then verify that the public entry screen and registration route render beyond Loading. Primary `egyptbjj.vercel.app` on 291ad93 renders the actual sign-in UI with no Loading screen.
+- [ ] Add a direct public registration link to the homepage so athletes do not need organizer sign-in.
+- [ ] Add a clear database-outage status page/state with retry and public guidance.
+- [ ] Verify the Vercel visitor link and registration route do not require Vercel or organizer authentication.
