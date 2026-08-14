@@ -4,9 +4,10 @@ import path from "path";
 
 export function serveStatic(app: Express) {
   const candidates = [
-    path.resolve(process.cwd(), "api", "public"),
+    path.resolve(process.cwd(), "dist", "public"),
     path.resolve(import.meta.dirname, "public"),
     path.resolve(import.meta.dirname, "..", "public"),
+    path.resolve(process.cwd(), "api", "public"),
   ];
   const distPath = candidates.find(candidate => fs.existsSync(candidate)) ?? candidates[0];
   if (!fs.existsSync(distPath)) {

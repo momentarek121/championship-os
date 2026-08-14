@@ -266,3 +266,8 @@
 - [x] Add a responsive tournament analytics dashboard with registration totals, weight-category counts, belt counts, and operational KPIs. Added it to the organizer Overview using real dashboard data and responsive Recharts visuals.
 - [x] Add pure analytics calculations and tests based on real dashboard data without fabricated metrics. Added shared/analytics.ts and server/analytics.test.ts.
 - [x] Verify desktop/mobile rendering, build, and publish the analytics dashboard. TypeScript, 55 Vitest tests, and Production Build passed; responsive cards and charts use mobile-safe containers.
+
+- [ ] Diagnose and repair the current Vercel deployment Error state before other feature work.
+- [ ] Complete the five-page notes backlog from the attached project report.
+- [ ] Add the approved analytics suggestions: time filtering, analytics PDF export, and GI/No-Gi comparison.
+- [ ] Verify the real Vercel URL, run tests/build, and publish only after a successful deployment.
