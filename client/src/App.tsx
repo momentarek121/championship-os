@@ -10,6 +10,7 @@ import AthletePortal from "@/pages/AthletePortal";
 import PublicParticipants from "@/pages/PublicParticipants";
 import PublicInfo from "@/pages/PublicInfo";
 import DemoBrackets from "@/pages/DemoBrackets";
+import RefereeDesk from "@/pages/RefereeDesk";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/athlete/:slug"} component={AthletePortal} />
       <Route path={"/event/:slug/participants"} component={PublicParticipants} />
       <Route path={"/demo/brackets"} component={DemoBrackets} />
+      <Route path={"/referee"} component={RefereeDesk} />
       <Route path={"/rankings"}>{() => <PublicInfo section="rankings" />}</Route>
       <Route path={"/athletes"}>{() => <PublicInfo section="athletes" />}</Route>
       <Route path={"/membership"}>{() => <PublicInfo section="membership" />}</Route>

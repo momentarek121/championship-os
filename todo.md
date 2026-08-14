@@ -42,7 +42,7 @@
 - [x] Add a single guided setup flow for organizer, ruleset, divisions, mats, and registration link.
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
 - [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic pair generation and manual pairing plus result persistence are wired; full editing and advancement remain.
-- [ ] Add separate simple views for organizer, referee, and athlete. Athlete portal is now available; dedicated referee/role views remain.
+- [x] Add separate simple views for organizer, referee, and athlete. Organizer workspace, dedicated `/referee` scoring desk, and athlete portal are available; role-level permissions remain a separate audit item.
 - [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
 

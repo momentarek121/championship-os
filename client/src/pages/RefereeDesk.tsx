@@ -1,0 +1,34 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "wouter";
+import { ArrowLeft, Pause, Play, RotateCcw, Trophy } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+
+export default function RefereeDesk() {
+  const dashboard = trpc.tournament.dashboard.useQuery(undefined, { retry: false });
+  const finishMatch = trpc.tournament.finishMatch.useMutation({
+    onSuccess: () => { toast.success("Result saved and winner advanced"); dashboard.refetch(); },
+    onError: error => toast.error(error.message),
+  });
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [scoreA, setScoreA] = useState("0");
+  const [scoreB, setScoreB] = useState("0");
+  const [seconds, setSeconds] = useState(600);
+  const [running, setRunning] = useState(false);
+  const matches = (dashboard.data?.matches ?? []).filter((match: any) => match.status !== "finished");
+  const selected = useMemo(() => matches.find((match: any) => match.id === selectedId) ?? matches[0], [matches, selectedId]);
+  const athleteName = (id: number | null) => (dashboard.data?.athletes ?? []).find((athlete: any) => athlete.id === id)?.fullName ?? "Awaiting athlete";
+  const winnerId = selected ? (Number(scoreA) >= Number(scoreB) ? selected.athleteAId : selected.athleteBId) : null;
+  useEffect(() => {
+    if (!running || seconds <= 0) return;
+    const timer = window.setInterval(() => setSeconds(value => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [running, seconds]);
+  const formatTime = `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
+
+  return <div className="min-h-screen bg-[#07111f] px-4 py-8 text-white sm:px-8"><div className="mx-auto max-w-6xl"><Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-[#d7ff54]"><ArrowLeft className="h-4 w-4" /> Back to organizer</Link><div className="mt-7 flex flex-col gap-4 border-b border-white/10 pb-7 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.3em] text-[#d7ff54]">Referee desk</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">Run the next match.</h1><p className="mt-3 max-w-2xl text-slate-300">Select a live queue match, control the timer, record scores, and publish the winner to the next round.</p></div><Badge className="w-fit bg-white/10 px-4 py-2 text-slate-200">Organizer access required</Badge></div>{dashboard.isLoading ? <p className="py-12 text-slate-300">Loading match queue…</p> : dashboard.isError ? <Card className="mt-8 border-0 bg-white text-slate-900"><CardContent className="p-8">Sign in with an organizer account to open the referee desk.</CardContent></Card> : <div className="mt-8 grid gap-6 lg:grid-cols-[.8fr_1.2fr]"><Card className="border-0 bg-white text-slate-900"><CardHeader><CardTitle>Match queue</CardTitle></CardHeader><CardContent className="space-y-3">{matches.length === 0 ? <p className="text-sm text-slate-500">No unfinished matches are published yet.</p> : matches.map((match: any) => <button key={match.id} onClick={() => { setSelectedId(match.id); setScoreA(String(match.scoreA ?? 0)); setScoreB(String(match.scoreB ?? 0)); }} className={`w-full rounded-xl border p-4 text-left ${selected?.id === match.id ? "border-[#07111f] bg-[#d7ff54]" : "border-slate-200 bg-slate-50"}`}><div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-wider">{match.round} · Match {match.matchNumber}</span><Badge>{match.status}</Badge></div><p className="mt-3 font-bold">{athleteName(match.athleteAId)}</p><p className="text-sm text-slate-500">vs {athleteName(match.athleteBId)}</p></button>)}</CardContent></Card><Card className="border-0 bg-white text-slate-900"><CardHeader><CardTitle>{selected ? `${selected.round} · Match ${selected.matchNumber}` : "No match selected"}</CardTitle></CardHeader><CardContent>{selected ? <div className="space-y-6"><div className="grid grid-cols-2 gap-3"><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs font-bold uppercase text-slate-500">Athlete A</p><p className="mt-2 font-black">{athleteName(selected.athleteAId)}</p><Input className="mt-4" type="number" min="0" value={scoreA} onChange={event => setScoreA(event.target.value)} /></div><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs font-bold uppercase text-slate-500">Athlete B</p><p className="mt-2 font-black">{athleteName(selected.athleteBId)}</p><Input className="mt-4" type="number" min="0" value={scoreB} onChange={event => setScoreB(event.target.value)} /></div></div><div className="rounded-2xl bg-[#07111f] p-6 text-center text-white"><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Digital timer</p><p className="mt-2 text-6xl font-black tabular-nums">{formatTime}</p><div className="mt-4 flex justify-center gap-2"><Button variant="outline" className="border-white/20 bg-transparent text-white" onClick={() => setRunning(value => !value)}>{running ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}{running ? "Pause" : "Start"}</Button><Button variant="outline" className="border-white/20 bg-transparent text-white" onClick={() => { setRunning(false); setSeconds(600); }}><RotateCcw className="mr-2 h-4 w-4" />Reset</Button></div></div><Button disabled={!winnerId || finishMatch.isPending} className="w-full bg-[#d7ff54] text-[#07111f]" onClick={() => finishMatch.mutate({ matchId: selected.id, winnerId: winnerId!, scoreA: Number(scoreA), scoreB: Number(scoreB) })}><Trophy className="mr-2 h-4 w-4" /> Finish match and advance winner</Button></div> : <p className="text-sm text-slate-500">Select a queued match to begin.</p>}</CardContent></Card></div>}</div></div>;
+}
