@@ -153,3 +153,5 @@
 - [ ] Re-run public and authenticated production smoke tests after the Supabase cutover.
 
 - [ ] Align mat status values with the live Supabase constraint (`idle`, `active`, `paused`) and re-run the demo seed plus all authenticated smoke tests.
+
+- [ ] Make the demo seeder recover from a partially created `demo-live` tournament instead of returning before mats and matches are completed.
