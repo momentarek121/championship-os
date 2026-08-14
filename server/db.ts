@@ -23,6 +23,17 @@ export async function getDb() {
   return _db;
 }
 
+export async function updateUserRole(input: { userId: number; role: "user" | "admin" | "organizer" | "registration_staff" | "weighin_staff" | "referee" | "mat_manager" | "athlete"; actorUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const existing = await db.select().from(users).where(eq(users.id, input.userId)).limit(1);
+  if (!existing[0]) throw new Error("User not found");
+  if (existing[0].openId === ENV.ownerOpenId && input.role !== "admin") throw new Error("The project owner must remain an admin");
+  await db.update(users).set({ role: input.role }).where(eq(users.id, input.userId));
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "user", entityId: input.userId, action: "role_change", beforeValue: JSON.stringify({ role: existing[0].role }), afterValue: JSON.stringify({ role: input.role }) });
+  return { success: true } as const;
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");

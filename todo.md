@@ -2,7 +2,7 @@
 
 - [x] Review the full tournament brief and define the MVP workflows.
 - [x] Establish the tournament, athlete, club, category, registration, payment, check-in, weigh-in, mat, match, bracket, result, and audit-log data model.
-- [ ] Add role-aware access for Super Admin, Organizer, Registration Staff, Weigh-in Staff, Referee, Mat Manager, and Athlete.
+- [x] Add role-aware access for Super Admin, Organizer, Registration Staff, Weigh-in Staff, Referee, Mat Manager, and Athlete. The shared capability matrix, role-specific procedures, expanded enum, audited assignment, and targeted tests are complete; owner/admin is the Super Admin model.
 - [x] Build the Championship OS dashboard shell with responsive navigation.
 - [x] Build tournament creation and tournament overview screens.
 - [x] Build athlete registration and profile management screens.
@@ -61,7 +61,7 @@
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
 - [x] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable. DEPLOYMENT.md documents that the validated project still needs schema execution and the adapter remains MySQL/TiDB.
-- [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected.
+- [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected. Initial guards exist; targeted allowed/forbidden role tests and end-to-end public-flow verification remain.
 
 - [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.
 - [x] Show pool assignment and category details immediately after public registration and in the organizer dashboard.

@@ -1,10 +1,12 @@
 import { z } from "zod";
 import { nanoid } from "nanoid";
+import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
-import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn } from "./db";
+import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
+import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
+import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -38,11 +40,14 @@ export const appRouter = router({
       return createPublicRegistration({ ...input, tournamentId: tournament.id, expectedWeight: input.expectedWeight.toFixed(2) });
     }),
   }),
+  users: router({
+    updateRole: adminProcedure.input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "organizer", "registration_staff", "weighin_staff", "referee", "mat_manager", "athlete"]) })).mutation(({ input, ctx }) => updateUserRole({ ...input, actorUserId: ctx.user.id })),
+  }),
   tournament: router({
-    dashboard: adminProcedure.query(() => getTournamentDashboard()),
+    dashboard: staffProcedure.query(() => getTournamentDashboard()),
     clubs: adminProcedure.query(() => getClubs()),
     create: adminProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id })),
-    registerAthlete: adminProcedure.input(z.object({
+    registerAthlete: registrationProcedure.input(z.object({
       tournamentId: z.number(),
       fullName: z.string().min(2),
       email: z.string().email().optional().or(z.literal("")),
@@ -66,21 +71,23 @@ export const appRouter = router({
       registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
       sport: "Brazilian Jiu-Jitsu",
     })),
-    updateWeighIn: adminProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
+    updateWeighIn: weighInProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
     updateSettings: adminProcedure.input(z.object({ tournamentId: z.number(), organizationName: z.string().min(2), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/), scaleNotes: z.string().max(1000).default("") })).mutation(({ input, ctx }) => updateTournamentSettings({ ...input, actorUserId: ctx.user.id })),
-    generateBrackets: adminProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),
-    createManualMatch: adminProcedure.input(z.object({ tournamentId: z.number(), categoryId: z.number(), athleteAId: z.number(), athleteBId: z.number() })).mutation(({ input, ctx }) => createManualMatch({ ...input, actorUserId: ctx.user.id })),
-    finishMatch: adminProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0) })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
-    updateMatchStatus: adminProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
-    updateRegistration: adminProcedure.input(z.object({
+    generateBrackets: bracketProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),
+    createManualMatch: bracketProcedure.input(z.object({ tournamentId: z.number(), categoryId: z.number(), athleteAId: z.number(), athleteBId: z.number() })).mutation(({ input, ctx }) => createManualMatch({ ...input, actorUserId: ctx.user.id })),
+    finishMatch: refereeProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0) })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
+    updateMatchStatus: refereeProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
+    updateRegistration: staffProcedure.input(z.object({
       id: z.number(),
       paymentStatus: z.enum(["unpaid", "pending", "paid", "refunded"]).optional(),
       checkInStatus: z.enum(["not_checked_in", "checked_in"]).optional(),
       weighInStatus: z.enum(["pending", "passed", "overweight"]).optional(),
+      weighInNotes: z.string().max(1000).optional(),
       seed: z.number().int().min(1).max(999).nullable().optional(),
       status: z.enum(["pending", "approved", "rejected"]).optional(),
     })).mutation(({ input, ctx }) => {
       const { id, ...values } = input;
+      if (ctx.user.openId !== process.env.OWNER_OPEN_ID && !canUpdateRegistrationFields(ctx.user.role, values)) throw new TRPCError({ code: "FORBIDDEN", message: "This role cannot edit these registration fields" });
       return updateRegistrationStatus(id, values, ctx.user.id);
     }),
   }),
