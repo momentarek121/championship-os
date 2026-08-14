@@ -291,3 +291,4 @@
 - [ ] Complete Google OAuth provider setup and verify independent organizer login.
 - [ ] Verify the real Port Said registration route and database persistence before launch handoff.
 - [ ] Finish the urgent production registration/API and independent Google OAuth blockers, then run end-to-end smoke tests before declaring launch readiness.
+- [ ] Repair the Vercel API handler/rewrite so public tRPC requests return a real JSON response instead of HTTP 200 with an empty body.
