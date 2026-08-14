@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Home from "./pages/Home";
 import PublicRegistration from "./pages/PublicRegistration";
+import RegistrationRules from "./pages/RegistrationRules";
 import AthletePortal from "@/pages/AthletePortal";
 import PublicParticipants from "@/pages/PublicParticipants";
 import PublicInfo from "@/pages/PublicInfo";
@@ -19,6 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/register/:slug/rules"} component={RegistrationRules} />
       <Route path={"/register/:slug"} component={PublicRegistration} />
       <Route path={"/athlete/:slug"} component={AthletePortal} />
       <Route path={"/event/:slug/participants"} component={PublicParticipants} />

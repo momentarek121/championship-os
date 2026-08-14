@@ -1,5 +1,5 @@
 import { and, asc, desc, eq } from "drizzle-orm";
-import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
+import { calculateAge, expandCompetitionModes, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
 import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
 import { roundLabel } from "../shared/rounds";
@@ -188,6 +188,17 @@ export async function createAthleteRegistration(input: { athlete: typeof athlete
   return { athleteId, categoryId };
 }
 
+export async function updateAthleteProfile(input: { athleteId: number; fullName?: string; email?: string | null; phone?: string | null; dateOfBirth?: Date | null; gender?: "male" | "female"; belt?: string; expectedWeight?: string | null; actorUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const existing = await db.select().from(athletes).where(eq(athletes.id, input.athleteId)).limit(1);
+  if (!existing[0]) throw new Error("Athlete not found");
+  const { athleteId, actorUserId, ...values } = input;
+  await db.update(athletes).set(values).where(eq(athletes.id, athleteId));
+  await db.insert(auditLogs).values({ actorUserId, entityType: "athlete", entityId: athleteId, action: "profile_update", beforeValue: existing[0], afterValue: values });
+  return { success: true } as const;
+}
+
 export async function updateRegistrationStatus(id: number, values: Partial<typeof registrations.$inferInsert>, actorUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
@@ -281,17 +292,23 @@ export async function createPublicRegistration(input: { tournamentId: number; fu
   if (!db) throw new Error("Database is not available");
   const tournament = await db.select().from(tournaments).where(eq(tournaments.id, input.tournamentId)).limit(1);
   if (!input.dateOfBirth) throw new Error("Date of birth is required for category assignment");
-  const categoryValue = resolveCategory({ age: calculateAge(input.dateOfBirth), gender: input.gender, belt: input.belt, weight: Number(input.expectedWeight), sport: tournament[0]?.sport ?? "Brazilian Jiu-Jitsu", competitionMode: input.competitionMode });
-  const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
-  let categoryId = existingCategory[0]?.id;
-  if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport, competitionMode: categoryValue.competitionMode }).returning({ id: categories.id }); categoryId = createdCategory.id; }
-  const categoryRegistrations = await db.select().from(registrations).where(and(eq(registrations.tournamentId, input.tournamentId), eq(registrations.categoryId, categoryId)));
-  const pool = poolLabel(Math.floor(categoryRegistrations.length / 4));
-  const [createdAthlete] = await db.insert(athletes).values({ fullName: input.fullName, email: input.email || null, phone: input.phone || null, dateOfBirth: input.dateOfBirth ? new Date(`${input.dateOfBirth}T00:00:00Z`) : null, gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight }).returning({ id: athletes.id });
+  const modes = expandCompetitionModes(input.competitionMode);
+  const [createdAthlete] = await db.insert(athletes).values({ fullName: input.fullName, email: input.email || null, phone: input.phone || null, dateOfBirth: new Date(`${input.dateOfBirth}T00:00:00Z`), gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight }).returning({ id: athletes.id });
   const athleteId = createdAthlete.id;
   const code = `ATH-${String(athleteId).padStart(5, "0")}`;
-  await db.insert(registrations).values({ tournamentId: input.tournamentId, athleteId, categoryId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending", accreditationCode: code });
-  return { athleteId, categoryId, accreditationCode: code, categoryName: categoryValue.name, pool };
+  const created = [] as Array<{ categoryId: number; categoryName: string; competitionMode: "gi" | "nogi"; pool: string }>;
+  for (const competitionMode of modes) {
+    const categoryValue = resolveCategory({ age: calculateAge(input.dateOfBirth), gender: input.gender, belt: input.belt, weight: Number(input.expectedWeight), sport: tournament[0]?.sport ?? "Brazilian Jiu-Jitsu", competitionMode });
+    const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
+    let categoryId = existingCategory[0]?.id;
+    if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport, competitionMode: categoryValue.competitionMode }).returning({ id: categories.id }); categoryId = createdCategory.id; }
+    const categoryRegistrations = await db.select().from(registrations).where(and(eq(registrations.tournamentId, input.tournamentId), eq(registrations.categoryId, categoryId)));
+    const pool = poolLabel(Math.floor(categoryRegistrations.length / 4));
+    const registrationCode = modes.length > 1 ? `${code}-${competitionMode.toUpperCase()}` : code;
+    await db.insert(registrations).values({ tournamentId: input.tournamentId, athleteId, categoryId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending", accreditationCode: registrationCode });
+    created.push({ categoryId, categoryName: categoryValue.name, competitionMode, pool });
+  }
+  return { athleteId, categoryId: created[0].categoryId, accreditationCode: code, registrations: created };
 }
 
 

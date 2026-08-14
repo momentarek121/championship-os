@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateAge, poolLabel, resolveCategory, splitIntoPools } from "../shared/category";
+import { calculateAge, expandCompetitionModes, poolLabel, resolveCategory, splitIntoPools } from "../shared/category";
 
 describe("resolveCategory", () => {
   it("classifies an adult male black belt in the -77 kg division", () => {
@@ -7,6 +7,11 @@ describe("resolveCategory", () => {
   });
   it("classifies teens and female divisions", () => {
     expect(resolveCategory({ age: 16, gender: "female", belt: "Blue", weight: 61, sport: "No-Gi" })).toMatchObject({ ageGroup: "Teens", weightLimit: 63 });
+  });
+  it("expands Both into separate GI and No-Gi registrations", () => {
+    expect(expandCompetitionModes("gi")).toEqual(["gi"]);
+    expect(expandCompetitionModes("nogi")).toEqual(["nogi"]);
+    expect(expandCompetitionModes("both")).toEqual(["gi", "nogi"]);
   });
   it("keeps GI, No-Gi, and Both category labels distinct", () => {
     const base = { age: 24, gender: "male" as const, belt: "Black", weight: 76.8, sport: "BJJ" };

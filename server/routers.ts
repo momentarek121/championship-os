@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
 import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
-import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, reassignMatchMat, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
+import { createAthleteRegistration, updateAthleteProfile, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, reassignMatchMat, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -82,6 +82,7 @@ export const appRouter = router({
     reassignMatchMat: bracketProcedure.input(z.object({ matchId: z.number(), matId: z.number().nullable() })).mutation(({ input, ctx }) => reassignMatchMat({ ...input, actorUserId: ctx.user.id })),
     finishMatch: refereeProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0), advantageA: z.number().int().min(0).default(0), advantageB: z.number().int().min(0).default(0), penaltyA: z.number().int().min(0).default(0), penaltyB: z.number().int().min(0).default(0), evaluation: z.string().max(500).optional() })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
     updateMatchStatus: refereeProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
+    updateAthlete: staffProcedure.input(z.object({ athleteId: z.number(), fullName: z.string().min(2).optional(), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), dateOfBirth: z.string().optional(), gender: z.enum(["male", "female"]).optional(), belt: z.string().min(2).optional(), expectedWeight: z.number().positive().optional() })).mutation(({ input, ctx }) => updateAthleteProfile({ athleteId: input.athleteId, fullName: input.fullName, email: input.email || null, phone: input.phone || null, dateOfBirth: input.dateOfBirth ? new Date(`${input.dateOfBirth}T00:00:00Z`) : undefined, gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight?.toFixed(2), actorUserId: ctx.user.id })),
     updateRegistration: staffProcedure.input(z.object({
       id: z.number(),
       paymentStatus: z.enum(["unpaid", "pending", "paid", "refunded"]).optional(),

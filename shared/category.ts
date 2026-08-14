@@ -9,6 +9,10 @@ export function calculateAge(dateOfBirth: string | Date, now = new Date()) {
   return age;
 }
 
+export function expandCompetitionModes(mode: "gi" | "nogi" | "both") {
+  return mode === "both" ? (["gi", "nogi"] as const) : ([mode] as const);
+}
+
 export function resolveCategory(input: CategoryInput) {
   const ageGroup = input.age < 13 ? "Kids" : input.age < 16 ? "Youth" : input.age < 18 ? "Teens" : input.age < 30 ? "Adult" : "Master";
   const weightLimit = input.gender === "male" ? (input.weight <= 77 ? 77 : input.weight <= 85 ? 85 : 94) : (input.weight <= 63 ? 63 : input.weight <= 70 ? 70 : 76);

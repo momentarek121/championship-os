@@ -23,6 +23,7 @@ export function buildLoginUrl(input: { oauthPortalUrl: string; appId: string; re
 }
 
 export const getCanonicalAppOrigin = () => import.meta.env.VITE_CANONICAL_APP_ORIGIN || window.location.origin;
+export const getPublicAppOrigin = () => import.meta.env.VITE_PUBLIC_APP_ORIGIN || "https://egyptbjj.vercel.app";
 
 export const startLogin = () => {
   const canonicalOrigin = getCanonicalAppOrigin().replace(/\/$/, "");

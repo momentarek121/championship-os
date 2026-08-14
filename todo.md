@@ -232,3 +232,20 @@
 - [x] Add athlete-selected GI, No-Gi, or Both mode to public registration and persist it with category/pool assignment. The public procedure accepts the selected mode and the category metadata stores it.
 - [x] Ensure GI and No-Gi registrations are separated into distinct pools unless Both is explicitly selected. Mode is part of the category identity, so pool allocation occurs within the distinct GI, No-Gi, or Both category.
 - [x] Test the revised registration flow and publish the update. 52 Vitest tests, TypeScript validation, and production build passed; the updated checkpoint is ready to publish.
+
+- [x] Separate GI and No-Gi bracket boards visually in the organizer dashboard. Completed by the mode-specific bracket summary cards and category-aware match grouping.
+- [x] Add a pre-registration rules and instructions page for GI and No-Gi. Completed at `/register/:slug/rules`.
+- [x] Add organizer editing for athlete data and registration status before bracket generation. Completed with the guarded edit dialog and audit mutation.
+- [x] Fix responsive sizing and horizontal overflow for phone and tablet layouts. Completed with shell width guards and responsive padding; screenshot automation remains an environment limitation.
+- [x] Test desktop, tablet, and mobile flows and publish the update. 53 Vitest tests, TypeScript, Production Build, local routes, and the requested Vercel routes returned HTTP 200; screenshot capture was unavailable in the verification environment.
+
+- [x] Complete the unfinished GI/No-Gi visual bracket board separation. Organizer brackets now show independent GI, No-Gi, and Both-registration summary cards; match data remains category-separated.
+- [x] Add the unfinished pre-registration GI/No-Gi rules and instructions page. Added `/register/:slug/rules` and linked it from the registration form.
+- [x] Add organizer editing for athlete profile fields and registration status before bracket generation. Added a guarded edit dialog, server mutation, and audit log.
+- [x] Fix responsive sidebar, tables, cards, and horizontal overflow for phone and tablet widths. Added min-width/overflow guards and compact responsive padding; 390px automated captures were unavailable, while local route smoke and production build passed.
+- [x] Audit and document any remaining post-release gaps, then run tests/build and publish. Remaining scope is documented in SCOPE.md; tests/build/routes passed and the corrected checkpoint is ready.
+
+- [x] Make the Vercel domain the primary shareable registration and public-link origin. Organizer copy/display now uses `https://egyptbjj.vercel.app` via the public-origin helper, with an overrideable environment value.
+- [x] Change public Both registration to create separate GI and No-Gi registration/category/pool records. Both now creates one athlete profile plus two unique registrations with separate mode categories, pools, and internal codes.
+- [x] Ensure GI and No-Gi brackets never share a category or match pool, including Both athletes. Added shared mode expansion and category tests; bracket grouping uses each category’s competition mode.
+- [x] Update organizer/public copy and tests to reflect the corrected Both semantics. Rules page, public form link, separate-bracket cards, and 53-test suite are updated.
