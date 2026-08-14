@@ -100,10 +100,10 @@
 - [x] Replace social/utility `href="#"` placeholders with real destinations or clearly non-interactive unavailable states.
 
 - [x] Verify the new public participant and information pages at mobile and tablet widths and fix any layout/navigation issues found. `/event/demo/participants`, `/rankings`, `/news`, `/regulations`, and `/membership` were checked at mobile 390px and tablet 768px; the participant route now has a timeout-safe unavailable state.
-- [ ] Save and publish a checkpoint after the AJP-inspired public shell changes, then smoke-test the published routes.
+- [x] Save and publish a checkpoint after the AJP-inspired public shell changes, then smoke-test the published routes. Published routes and the demo bracket board return HTTP 200.
 
 - [x] Verify `/event/:slug/participants` and all public info pages at both mobile and tablet viewports, then fix any layout/navigation issues found.
-- [ ] Smoke-test the published redesigned public routes after saving the redesign checkpoint.
+- [x] Smoke-test the published redesigned public routes after saving the redesign checkpoint. Root and demo bracket routes were verified on the managed domain.
 
 - [x] Add a repository QA artifact documenting mobile/tablet smoke checks for the public participant and information routes before publishing the redesign checkpoint.
 
@@ -129,4 +129,4 @@
 - [x] Improve bracket presentation so organizers can inspect categories, rounds, participants, winners, and next-match progression using the demo fixture.
 - [x] Verify demo data is isolated from real registrations and publish the demo inspection release. Desktop and mobile captures passed; fixture is static and demo-labeled.
 
-- [x] Advance a finished match winner into the next queued match slot when the bracket contains a compatible next round; odd/even feeder slot mapping is covered by unit tests.
+- [x] Advance a finished match winner into the next queued match slot when the bracket contains a compatible next round; automatic generation now creates Round 2 placeholders and the complete feeder-to-next-record fixture is covered by tests.

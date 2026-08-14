@@ -291,10 +291,16 @@ export async function generateAutomaticBrackets(tournamentId: number, actorUserI
     created += 1;
   }
   for (const [categoryId, firstRoundMatches] of Array.from(categoryCounts.entries())) {
-    const nextRoundMatches = nextRoundMatchCount(firstRoundMatches);
-    for (let matchNumber = 1; matchNumber <= nextRoundMatches; matchNumber += 1) {
-      await db.insert(matches).values({ tournamentId, categoryId, round: "Round 2", matchNumber, athleteAId: null, athleteBId: null, status: "queued" });
-      created += 1;
+    let currentRoundMatches = firstRoundMatches;
+    let roundNumber = 2;
+    while (currentRoundMatches > 1) {
+      const nextRoundMatches = nextRoundMatchCount(currentRoundMatches);
+      for (let matchNumber = 1; matchNumber <= nextRoundMatches; matchNumber += 1) {
+        await db.insert(matches).values({ tournamentId, categoryId, round: `Round ${roundNumber}`, matchNumber, athleteAId: null, athleteBId: null, status: "queued" });
+        created += 1;
+      }
+      currentRoundMatches = nextRoundMatches;
+      roundNumber += 1;
     }
   }
   await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: JSON.stringify({ created, firstRoundMatches: pairs.length }) });
