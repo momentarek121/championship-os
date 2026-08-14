@@ -258,7 +258,13 @@ export async function getTournamentBySlug(slug: string) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db.select().from(tournaments).where(eq(tournaments.registrationSlug, slug)).limit(1);
-  return result[0];
+  if (result[0]) return result[0];
+  // The live legacy record was created before the slug column was normalized.
+  // Keep the production event link stable while older rows are migrated.
+  const legacyTournamentId = slug === "portsaid-bjj-championship" ? 1 : slug === "demo-live" ? 30001 : null;
+  if (legacyTournamentId == null) return undefined;
+  const legacy = await db.select().from(tournaments).where(eq(tournaments.id, legacyTournamentId)).limit(1);
+  return legacy[0];
 }
 
 export async function getPublicParticipants(slug: string) {
