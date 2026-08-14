@@ -140,3 +140,5 @@
 - [x] Seed demo categories, pools, mats, multi-round matches, live scoring states, finished results, and athlete portal records without touching real tournaments.
 - [ ] Add a clear demo reset/label boundary and connect the populated fixture to organizer, referee, results, public participants, and athlete views. The fixed `demo-live` slug and Demo labels are complete; authenticated referee, Results, and athlete-portal proof remains open.
 - [ ] Verify the populated demo pages and workflows on desktop/mobile, then publish a demo-ready checkpoint. Public participants passed; authenticated organizer, referee, Results, and athlete-portal workflows still require a real session.
+
+- [x] Add a read-only `/demo/referee` view with synthetic live/queued matches and timer controls for unauthenticated UI testing; the route is visually verified and never calls production scoring mutations.
