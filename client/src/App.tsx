@@ -13,6 +13,7 @@ import PublicParticipants from "@/pages/PublicParticipants";
 import PublicInfo from "@/pages/PublicInfo";
 import DemoBrackets from "@/pages/DemoBrackets";
 import RefereeDesk from "@/pages/RefereeDesk";
+import StaffDashboard from "@/pages/StaffDashboard";
 import DemoReferee from "@/pages/DemoReferee";
 
 function Router() {
@@ -27,6 +28,7 @@ function Router() {
       <Route path={"/demo/brackets"} component={DemoBrackets} />
       <Route path={"/demo/referee"} component={DemoReferee} />
       <Route path={"/referee"} component={RefereeDesk} />
+      <Route path={"/staff"} component={StaffDashboard} />
       <Route path={"/rankings"}>{() => <PublicInfo section="rankings" />}</Route>
       <Route path={"/athletes"}>{() => <PublicInfo section="athletes" />}</Route>
       <Route path={"/membership"}>{() => <PublicInfo section="membership" />}</Route>

@@ -257,3 +257,8 @@
 - [x] Audit every attached-report requirement and classify it as deployed, implemented but previously unpublished, or not implemented. See STATUS_MATRIX_AR.md.
 - [x] Treat in-browser/device notifications as the notification priority and exclude WhatsApp from the immediate backlog. The matrix records that a standalone device/in-app notification system is not yet implemented; WhatsApp is excluded from immediate scope.
 - [x] Deliver the exact Arabic status matrix with live deployment and code evidence. See STATUS_MATRIX_AR.md.
+
+- [x] Build separate Registration Staff, Weigh-in Staff, Mat Manager, and Referee dashboard views with capability-based actions. Added `/staff`, role-specific sections, capability gating, focused `/referee` handoff, and Realtime/polling refresh.
+- [x] Add drag-and-drop match scheduling between mats/queues with persisted schedule updates. Staff can drag queued matches onto mat cards and persist assignments through the guarded mutation.
+- [x] Add visual drag-and-drop bracket slot editing with server validation and audit logging. Staff can drag athletes into Slot A/Slot B; the existing server validator and audit path remain authoritative.
+- [x] Re-audit the attached report, test responsive staff workflows, and publish the verified release. TypeScript, 53 Vitest tests, production build, and the corrected scope matrix passed; responsive shell guards are in place.
