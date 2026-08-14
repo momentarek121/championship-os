@@ -26,7 +26,7 @@
 - [x] Add a visible tournament workspace and shareable tournament link.
 - [ ] Verify the public registration flow, database persistence, weigh-in rules, and bracket workflows. Local build/tests pass; live provider verification remains.
 
-- [ ] Replace the current MySQL/TiDB database adapter with a Supabase-compatible PostgreSQL adapter.
+- [x] Replace the current MySQL/TiDB database adapter with a Supabase-compatible PostgreSQL adapter. Drizzle now uses node-postgres, snake_case Supabase mappings, PostgreSQL returning clauses, and onConflictDoUpdate.
 - [x] Add Supabase SQL schema for users, tournaments, clubs, athletes, categories, registrations, mats, matches, and audit logs.
 - [x] Add Supabase environment-variable documentation and Vercel deployment settings.
 - [x] Verify GitHub contains the latest implementation and deployment configuration.
@@ -44,7 +44,7 @@
 - [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic generation, full-round placeholders, winner advancement, referee scoring, manual pairing, queued-slot editing, and medal results are wired; authenticated end-to-end verification remains.
 - [x] Add separate simple views for organizer, referee, and athlete. Organizer workspace, dedicated `/referee` scoring desk, and athlete portal are available; capability-level permissions are documented and tested.
 - [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
-- [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
+- [x] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete. The active runtime prefers SUPABASE_DATABASE_URL and the application-level Drizzle read smoke test passed against Supabase.
 
 - [x] Add editable organization name, weigh-in mode, tolerance, and scale notes to the tournament setup UI and persistence path.
 - [x] Add a true guided setup flow covering organizer details, ruleset, divisions, mats, and registration publishing.
@@ -60,7 +60,7 @@
 - [x] Add an auth smoke test or explicit manual verification note covering login initiation and callback success. The OAuth URL builder is covered by Vitest.
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
-- [x] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable. DEPLOYMENT.md documents that the validated project still needs schema execution and the adapter remains MySQL/TiDB.
+- [x] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable. The Supabase schema is present, the runtime adapter is PostgreSQL, and DEPLOYMENT.md records the legacy malformed migration metadata limitation.
 - [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected. Initial guards exist; targeted allowed/forbidden role tests and end-to-end public-flow verification remain.
 
 - [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.
@@ -123,7 +123,7 @@
 - [x] Add an integrated bracket-flow test that filters mixed registrations for eligibility and then pairs only approved athletes who passed weigh-in.
 - [x] Add an organizer setup mutation and form controls that persist organization name, weigh-in mode, tolerance, and scale notes.
 
-- [ ] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data.
+- [ ] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data. Connectivity and read-only Drizzle compatibility pass; a real write remains intentionally unperformed pending an authenticated production-safe flow.
 
 - [x] Add an explicitly labeled demo tournament fixture with non-production athletes across children, girls, boys, and adult divisions, plus representative pools and bracket states.
 - [x] Improve bracket presentation so organizers can inspect categories, rounds, participants, winners, and next-match progression using the demo fixture.
@@ -147,3 +147,7 @@
 
 - [x] Replace bracket slot DOM scraping with controlled per-match React state for athlete A/B selections.
 - [ ] Add focused bracket-slot tests and a safe verification path proving queued edits persist while finished-match edits are rejected. Policy tests cover editable statuses, duplicate-athlete rejection, and finished-match protection; a real persistence smoke check remains.
+
+- [ ] Cut the managed production runtime over to SUPABASE_DATABASE_URL and verify it no longer reads the legacy MySQL/TiDB data source.
+- [ ] Re-seed the synthetic demo tournament into Supabase after the production cutover and verify organizer, brackets, referee, Results, and athlete portal data.
+- [ ] Re-run public and authenticated production smoke tests after the Supabase cutover.

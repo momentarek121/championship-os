@@ -5,7 +5,8 @@ import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shar
 import { normalizeTournamentSettings } from "../shared/tournamentSettings";
 import { selectNextMatch } from "../shared/athletePortal";
 import { canEditMatchSlots, validateMatchSlots } from "../shared/matchEditing";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -13,9 +14,11 @@ let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the Drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  const rawDatabaseUrl = process.env.SUPABASE_DATABASE_URL ?? process.env.DATABASE_URL;
+  const databaseUrl = rawDatabaseUrl?.replace(/^['"]|['"]$/g, "");
+  if (!_db && databaseUrl) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(new Pool({ connectionString: databaseUrl, max: 10 }));
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -31,7 +34,7 @@ export async function updateUserRole(input: { userId: number; role: "user" | "ad
   if (!existing[0]) throw new Error("User not found");
   if (existing[0].openId === ENV.ownerOpenId && input.role !== "admin") throw new Error("The project owner must remain an admin");
   await db.update(users).set({ role: input.role }).where(eq(users.id, input.userId));
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "user", entityId: input.userId, action: "role_change", beforeValue: JSON.stringify({ role: existing[0].role }), afterValue: JSON.stringify({ role: input.role }) });
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "user", entityId: input.userId, action: "role_change", beforeValue: { role: existing[0].role }, afterValue: { role: input.role } });
   return { success: true } as const;
 }
 
@@ -85,7 +88,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -139,8 +143,8 @@ export async function getTournamentDashboard() {
 export async function createTournament(input: typeof tournaments.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
-  const result = await db.insert(tournaments).values(input);
-  return result[0].insertId;
+  const [result] = await db.insert(tournaments).values(input).returning({ id: tournaments.id });
+  return result.id;
 }
 
 export async function createAthleteRegistration(input: { athlete: typeof athletes.$inferInsert; registration: Omit<typeof registrations.$inferInsert, "athleteId">; sport?: string }) {
@@ -151,9 +155,10 @@ export async function createAthleteRegistration(input: { athlete: typeof athlete
   if (!input.athlete.dateOfBirth) throw new Error("Date of birth is required for category assignment");
   const categoryValue = resolveCategory({ age: calculateAge(input.athlete.dateOfBirth), gender: input.athlete.gender, belt: input.athlete.belt, weight: Number(input.athlete.expectedWeight), sport });
   const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.registration.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
-  const categoryId = existingCategory[0]?.id ?? Number((await db.insert(categories).values({ tournamentId: input.registration.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport }))[0].insertId);
-  const athleteResult = await db.insert(athletes).values(input.athlete);
-  const athleteId = athleteResult[0].insertId;
+  let categoryId = existingCategory[0]?.id;
+  if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.registration.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport }).returning({ id: categories.id }); categoryId = createdCategory.id; }
+  const [createdAthlete] = await db.insert(athletes).values(input.athlete).returning({ id: athletes.id });
+  const athleteId = createdAthlete.id;
   await db.insert(registrations).values({ ...input.registration, athleteId, categoryId });
   return { athleteId, categoryId };
 }
@@ -163,7 +168,7 @@ export async function updateRegistrationStatus(id: number, values: Partial<typeo
   if (!db) throw new Error("Database is not available");
   const existing = await db.select().from(registrations).where(eq(registrations.id, id)).limit(1);
   await db.update(registrations).set(values).where(eq(registrations.id, id));
-  await db.insert(auditLogs).values({ actorUserId, entityType: "registration", entityId: id, action: "update", beforeValue: JSON.stringify(existing[0] ?? null), afterValue: JSON.stringify(values) });
+  await db.insert(auditLogs).values({ actorUserId, entityType: "registration", entityId: id, action: "update", beforeValue: existing[0] ?? null, afterValue: values });
   return { success: true } as const;
 }
 
@@ -171,7 +176,7 @@ export async function updateTournamentWeighIn(tournamentId: number, weighInMode:
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   await db.update(tournaments).set({ weighInMode, weighInTolerance }).where(eq(tournaments.id, tournamentId));
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "weigh_in_settings", afterValue: JSON.stringify({ weighInMode, weighInTolerance }) });
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "weigh_in_settings", afterValue: { weighInMode, weighInTolerance } });
   return { success: true } as const;
 }
 
@@ -182,7 +187,7 @@ export async function updateTournamentSettings(input: { tournamentId: number; or
   if (!existing[0]) throw new Error("Tournament not found");
   const settings = normalizeTournamentSettings(input);
   await db.update(tournaments).set({ organizationName: settings.organizationName, weighInMode: settings.weighInMode, weighInTolerance: settings.weighInTolerance, scaleNotes: settings.scaleNotes || null }).where(eq(tournaments.id, input.tournamentId));
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "settings", beforeValue: JSON.stringify(existing[0]), afterValue: JSON.stringify(settings) });
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "settings", beforeValue: existing[0], afterValue: settings });
   return { success: true } as const;
 }
 
@@ -249,11 +254,12 @@ export async function createPublicRegistration(input: { tournamentId: number; fu
   if (!input.dateOfBirth) throw new Error("Date of birth is required for category assignment");
   const categoryValue = resolveCategory({ age: calculateAge(input.dateOfBirth), gender: input.gender, belt: input.belt, weight: Number(input.expectedWeight), sport: tournament[0]?.sport ?? "Brazilian Jiu-Jitsu" });
   const existingCategory = await db.select().from(categories).where(and(eq(categories.tournamentId, input.tournamentId), eq(categories.name, categoryValue.name))).limit(1);
-  const categoryId = existingCategory[0]?.id ?? Number((await db.insert(categories).values({ tournamentId: input.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport }))[0].insertId);
+  let categoryId = existingCategory[0]?.id;
+  if (!categoryId) { const [createdCategory] = await db.insert(categories).values({ tournamentId: input.tournamentId, name: categoryValue.name, ageGroup: categoryValue.ageGroup, gender: categoryValue.gender, belt: categoryValue.belt, weightLimit: categoryValue.weightLimit.toFixed(2), sport: categoryValue.sport }).returning({ id: categories.id }); categoryId = createdCategory.id; }
   const categoryRegistrations = await db.select().from(registrations).where(and(eq(registrations.tournamentId, input.tournamentId), eq(registrations.categoryId, categoryId)));
   const pool = poolLabel(Math.floor(categoryRegistrations.length / 4));
-  const athleteResult = await db.insert(athletes).values({ fullName: input.fullName, email: input.email || null, phone: input.phone || null, dateOfBirth: input.dateOfBirth ? new Date(`${input.dateOfBirth}T00:00:00Z`) : null, gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight });
-  const athleteId = athleteResult[0].insertId;
+  const [createdAthlete] = await db.insert(athletes).values({ fullName: input.fullName, email: input.email || null, phone: input.phone || null, dateOfBirth: input.dateOfBirth ? new Date(`${input.dateOfBirth}T00:00:00Z`) : null, gender: input.gender, belt: input.belt, expectedWeight: input.expectedWeight }).returning({ id: athletes.id });
+  const athleteId = createdAthlete.id;
   const code = `ATH-${String(athleteId).padStart(5, "0")}`;
   await db.insert(registrations).values({ tournamentId: input.tournamentId, athleteId, categoryId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending", accreditationCode: code });
   return { athleteId, categoryId, accreditationCode: code, categoryName: categoryValue.name, pool };
@@ -276,7 +282,7 @@ export async function finishMatch(input: { matchId: number; winnerId: number; sc
       advancedTo = next[0].id;
     }
   }
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "finish", beforeValue: JSON.stringify(existing[0]), afterValue: JSON.stringify({ ...input, advancedTo }) });
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "finish", beforeValue: existing[0], afterValue: { ...input, advancedTo } });
   return { success: true, advancedTo } as const;
 }
 
@@ -284,7 +290,7 @@ export async function updateMatchStatus(matchId: number, status: "queued" | "cal
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   await db.update(matches).set({ status }).where(eq(matches.id, matchId));
-  await db.insert(auditLogs).values({ actorUserId, entityType: "match", entityId: matchId, action: "status", afterValue: JSON.stringify({ status }) });
+  await db.insert(auditLogs).values({ actorUserId, entityType: "match", entityId: matchId, action: "status", afterValue: { status } });
   return { success: true } as const;
 }
 
@@ -315,7 +321,7 @@ export async function generateAutomaticBrackets(tournamentId: number, actorUserI
       roundNumber += 1;
     }
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: JSON.stringify({ created, firstRoundMatches: pairs.length }) });
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: { created, firstRoundMatches: pairs.length } });
   return { success: true, created } as const;
 }
 
@@ -326,9 +332,9 @@ export async function createManualMatch(input: { tournamentId: number; categoryI
   const existing = await db.select().from(matches).where(and(eq(matches.tournamentId, input.tournamentId), eq(matches.athleteAId, input.athleteAId), eq(matches.athleteBId, input.athleteBId))).limit(1);
   if (existing[0]) return existing[0].id;
   const count = await db.select().from(matches).where(eq(matches.tournamentId, input.tournamentId));
-  const result = await db.insert(matches).values({ tournamentId: input.tournamentId, categoryId: input.categoryId, round: "Manual", matchNumber: count.length + 1, athleteAId: input.athleteAId, athleteBId: input.athleteBId, status: "queued" });
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "manual_match", afterValue: JSON.stringify(input) });
-  return Number(result[0].insertId);
+  const [result] = await db.insert(matches).values({ tournamentId: input.tournamentId, categoryId: input.categoryId, round: "Manual", matchNumber: count.length + 1, athleteAId: input.athleteAId, athleteBId: input.athleteBId, status: "queued" }).returning({ id: matches.id });
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "manual_match", afterValue: input });
+  return result.id;
 }
 
 
@@ -337,8 +343,8 @@ export async function seedDemoTournament(actorUserId: number) {
   if (!db) throw new Error("Database is not available");
   const existing = await db.select().from(tournaments).where(eq(tournaments.registrationSlug, "demo-live")).limit(1);
   if (existing[0]) return { tournamentId: existing[0].id, created: false, message: "Demo tournament already exists" } as const;
-  const tournamentResult = await db.insert(tournaments).values({ name: "Championship OS Demo Open", sport: "Brazilian Jiu-Jitsu", location: "Demo Arena", status: "live", ruleset: "IBJJF Standard", organizationName: "Championship OS Demo", registrationSlug: "demo-live", weighInMode: "ibjjf", weighInTolerance: "0.00", scaleNotes: "DEMO ONLY · Use the digital scale at Mat 1", createdBy: actorUserId });
-  const tournamentId = Number(tournamentResult[0].insertId);
+  const [createdTournament] = await db.insert(tournaments).values({ name: "Championship OS Demo Open", sport: "Brazilian Jiu-Jitsu", location: "Demo Arena", status: "live", ruleset: "IBJJF Standard", organizationName: "Championship OS Demo", registrationSlug: "demo-live", weighInMode: "ibjjf", weighInTolerance: "0.00", scaleNotes: "DEMO ONLY · Use the digital scale at Mat 1", createdBy: actorUserId }).returning({ id: tournaments.id });
+  const tournamentId = createdTournament.id;
   const divisions = [
     { name: "Kids · Boys · White · -30 KG", ageGroup: "Kids", gender: "male" as const, belt: "White", weightLimit: "30.00", count: 4 },
     { name: "Girls · Youth · White · -45 KG", ageGroup: "Youth", gender: "female" as const, belt: "White", weightLimit: "45.00", count: 4 },
@@ -350,13 +356,13 @@ export async function seedDemoTournament(actorUserId: number) {
   const athletesByCategory: Array<{ categoryId: number; athleteIds: number[] }> = [];
   let nameIndex = 0;
   for (const [divisionIndex, division] of Array.from(divisions.entries())) {
-    const categoryResult = await db.insert(categories).values({ tournamentId, name: division.name, ageGroup: division.ageGroup, gender: division.gender, belt: division.belt, weightLimit: division.weightLimit, sport: "Brazilian Jiu-Jitsu" });
-    const categoryId = Number(categoryResult[0].insertId);
+    const [createdCategory] = await db.insert(categories).values({ tournamentId, name: division.name, ageGroup: division.ageGroup, gender: division.gender, belt: division.belt, weightLimit: division.weightLimit, sport: "Brazilian Jiu-Jitsu" }).returning({ id: categories.id });
+    const categoryId = createdCategory.id;
     const athleteIds: number[] = [];
     for (let index = 0; index < division.count; index += 1) {
       const dateOfBirth = new Date(Date.UTC(2015 - divisionIndex * 3, 4, 10 + index));
-      const athleteResult = await db.insert(athletes).values({ fullName: names[nameIndex++], email: `demo${nameIndex}@example.test`, phone: `01000000${String(nameIndex).padStart(3, "0")}`, dateOfBirth, gender: division.gender, belt: division.belt, expectedWeight: division.weightLimit, actualWeight: index === 3 ? String(Number(division.weightLimit) + 1.2) : division.weightLimit });
-      const athleteId = Number(athleteResult[0].insertId);
+      const [createdAthlete] = await db.insert(athletes).values({ fullName: names[nameIndex++], email: `demo${nameIndex}@example.test`, phone: `01000000${String(nameIndex).padStart(3, "0")}`, dateOfBirth, gender: division.gender, belt: division.belt, expectedWeight: division.weightLimit, actualWeight: index === 3 ? String(Number(division.weightLimit) + 1.2) : division.weightLimit }).returning({ id: athletes.id });
+      const athleteId = createdAthlete.id;
       athleteIds.push(athleteId);
       const isOverweight = index === 3;
       const isApproved = index < 3;
@@ -366,8 +372,8 @@ export async function seedDemoTournament(actorUserId: number) {
   }
   const matIds: number[] = [];
   for (const name of ["Mat 1", "Mat 2", "Mat 3", "Mat 4"]) {
-    const result = await db.insert(mats).values({ tournamentId, name, status: name === "Mat 1" ? "live" : "available" });
-    matIds.push(Number(result[0].insertId));
+    const [createdMat] = await db.insert(mats).values({ tournamentId, name, status: name === "Mat 1" ? "live" : "available" }).returning({ id: mats.id });
+    matIds.push(createdMat.id);
   }
   let matchNumber = 1;
   for (const [index, group] of Array.from(athletesByCategory.entries())) {
@@ -376,7 +382,7 @@ export async function seedDemoTournament(actorUserId: number) {
     await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[(index + 1) % matIds.length], round: "Round 1", matchNumber: matchNumber++, athleteAId: c, athleteBId: null, scoreA: 0, scoreB: 0, status: index === 0 ? "live" : "queued" });
     await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[index % matIds.length], round: "Round 2", matchNumber: matchNumber++, athleteAId: a, athleteBId: c, scoreA: index === 0 ? 2 : 8, scoreB: index === 0 ? 0 : 6, winnerId: index === 0 ? null : a, status: index === 0 ? "queued" : "finished", finishedAt: index === 0 ? null : new Date() });
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: JSON.stringify({ demo: true, divisions: divisions.map(division => division.name), athletes: names.length }) });
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: { demo: true, divisions: divisions.map(division => division.name), athletes: names.length } });
   return { tournamentId, created: true, message: "Demo tournament seeded" } as const;
 }
 
@@ -390,6 +396,6 @@ export async function updateMatchSlots(input: { matchId: number; athleteAId: num
   if (!existing[0]) throw new Error("Match not found");
   if (!canEditMatchSlots(existing[0].status)) throw new Error("Finished matches cannot be edited");
   await db.update(matches).set({ athleteAId: input.athleteAId, athleteBId: input.athleteBId }).where(eq(matches.id, input.matchId));
-  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "edit_slots", beforeValue: JSON.stringify({ athleteAId: existing[0].athleteAId, athleteBId: existing[0].athleteBId }), afterValue: JSON.stringify({ athleteAId: input.athleteAId, athleteBId: input.athleteBId }) });
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "edit_slots", beforeValue: { athleteAId: existing[0].athleteAId, athleteBId: existing[0].athleteBId }, afterValue: { athleteAId: input.athleteAId, athleteBId: input.athleteBId } });
   return { success: true } as const;
 }
