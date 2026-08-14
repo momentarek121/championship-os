@@ -21,3 +21,7 @@ The referee route intentionally requires an authenticated staff session; its una
 A read-only server verification found the `demo-live` tournament with 20 synthetic athletes, 20 demo registrations, 15 matches, 15 passed weigh-ins, and 5 overweight cases. A real portal lookup using the seeded accreditation code `DEMO-30001` returned `Adam Demo`, the assigned category, and a next match in `Round 2`. The organizer dashboard now selects the demo tournament first by newest ID, while the older real tournament remains in the database.
 
 Browser captures prove the populated organizer Overview and public participants route. Browser authentication is still required to capture the protected Results and Referee screens with the seeded match data; the verifier confirms the underlying records are present without modifying them.
+
+## Seeded public route smoke test — 2026-08-14
+
+The local preview returned HTTP 200 for `/register/demo-live`, `/event/demo-live/participants`, `/athlete/demo-live`, `/demo/brackets`, and `/demo/referee`. The athlete route presents the accreditation-code lookup form; the seeded code `DEMO-30001` was verified separately through the read-only server workflow check.
