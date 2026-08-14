@@ -210,3 +210,10 @@
 - [x] Add integration-level tests for public registration mode persistence and refine final QA wording around authenticated/manual flows. The public path is mode-aware, category resolver coverage and a non-demo public participant read-back passed, and the QA artifact explicitly identifies the manual-browser limitation.
 - [x] Use medal information in runtime academy standings or document the current transparent wins-first behavior. Runtime dashboard standings now attach medal data from finished-match result derivation before applying tie-break sorting.
 - [x] Replace unsupported claims about a globally synchronized countdown with the delivered shared schedule polling behavior. The final QA document states that shared UTC schedule polling is synchronized while the interactive referee countdown remains local.
+
+- [x] Add CSV export for academy standings and medal counts.
+- [x] Add PDF export for academy standings and medal counts.
+- [x] Add real-time match status indicators and hover motion to the match table.
+- [x] Add advanced match filters for athlete, belt, and weight category.
+- [x] Add tests and visual/build verification for the new export and match-table features. TypeScript, 49 Vitest tests, production build, and organizer visual verification passed.
+- [x] Publish the updated release after all requested features pass verification.
