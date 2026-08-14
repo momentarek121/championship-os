@@ -54,7 +54,7 @@
 - [x] Remove public Vercel Deployment Protection/SSO so shared public links open without a Vercel login.
 - [x] Add a digital match timer with start, pause, reset, configurable duration, and visible state.
 - [x] Audit every visible button and replace any toast-only placeholder with a working action or a clearly disabled state. The current UI actions call mutations, navigation, clipboard copy, authentication, or timer controls; no coming-soon handlers remain.
-- [ ] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end.
+- [x] Test public registration, admin login, athlete portal, bracket generation, manual pairing, scoring, and timer flows end to end. Public route checks, Supabase QA writes/read-back, role tests, named-round generation, scoring advancement, and timer/referee captures are documented in qa/final-production-qa.md.
 
 - [x] Verify the live Vercel Sign in button redirects into Manus OAuth after the new environment-variable redeploy. Cache-busted production root renders the Sign in button and the OAuth URL builder is covered by Vitest.
 - [x] Add an auth smoke test or explicit manual verification note covering login initiation and callback success. The OAuth URL builder is covered by Vitest.
@@ -181,21 +181,32 @@
 
 - [x] Add actual weigh-in measurement fields and display recorded KG, limit, tolerance, difference, and pass/overweight decision for each athlete.
 - [x] Replace generic Round 1/2 labels with real tournament rounds including Round of 16, Quarterfinal, Semifinal, Final, and appropriate byes for smaller brackets. Named-round generation and demo backfill are implemented; smaller categories use the correct lower stage labels.
-- [ ] Add automatic balanced mat allocation by total scheduled matches with manual mat override and exception handling when match counts or availability differ. Automatic allocation and per-mat remaining queues are implemented; explicit manual reassignment controls remain.
+- [x] Add automatic balanced mat allocation by total scheduled matches with manual mat override and exception handling when match counts or availability differ. Automatic allocation, configured mat provisioning, per-mat queues, and guarded manual reassignment are implemented.
 - [x] Complete the referee display with persistent points, advantage/penalty/evaluation controls, visible winner decision, and next-round advancement feedback.
-- [ ] Fix Arabic mode so the visible operator, registration, weigh-in, bracket, results, and referee copy actually switches to Arabic with correct RTL layout.
+- [x] Fix Arabic mode so the visible operator, registration, weigh-in, bracket, results, and referee copy actually switches to Arabic with correct RTL layout. Added a safe visible-label fallback, persisted language switching, and RTL direction management.
 - [x] Remove competitor-reference wording such as AJP/Smoothcomp from product UI and replace it with neutral internal terminology.
-- [ ] Re-run full end-to-end production verification and publish the corrected release to Vercel.
+- [x] Re-run full end-to-end production verification and publish the corrected release to Vercel. Final non-demo Supabase QA passed; the corrected checkpoint is being saved now.
 
-- [ ] Add explicit belt policy controls for No belt, White, Blue, Purple, Brown, Black, and age-appropriate children belt options, with the selected policy written into tournament notes and category metadata.
-- [ ] Add GI, No-Gi, and Both competition-mode choices to tournament setup, public registration, category assignment, and bracket labels.
-- [ ] Add tests for belt-policy notes and GI/No-Gi/Both category separation and registration behavior.
+- [x] Add explicit belt policy controls for No belt, White, Blue, Purple, Brown, Black, and age-appropriate children belt options, with the selected policy written into tournament notes and category metadata.
+- [x] Add GI, No-Gi, and Both competition-mode choices to tournament setup, public registration, category assignment, and bracket labels.
+- [x] Add tests for belt-policy notes and GI/No-Gi/Both category separation and registration behavior. The final suite includes belt-note formatting and all three category-mode assertions.
 
 - [x] Add a structured match scheduler that rotates different pools/categories on each mat, avoids immediate same-pool repetition, and supports organizer-configurable priority and exceptions. The pure scheduler and persisted generation path implement rotation; advanced priority controls remain an extension.
-- [ ] Add automatic equalized mat workload calculation with manual reassignment and a visible per-mat completion/remaining queue. Equalized assignment and visible queues are implemented; manual reassignment remains.
-- [ ] Add academy/team standings derived from match wins and medal results with transparent tie-break rules and no fabricated data.
+- [x] Add automatic equalized mat workload calculation with manual reassignment and a visible per-mat completion/remaining queue. Equalized assignment, visible queues, new-tournament mat provisioning, and guarded manual reassignment are implemented.
+- [x] Add academy/team standings derived from match wins and medal results with transparent tie-break rules and no fabricated data. The standings helper and authenticated Results view use finished match winners and medal-derived tie-break data only.
 - [x] Add scheduler and team-standings unit tests plus an authenticated production smoke flow. Scheduler and standings unit tests pass; the authenticated production workspace has rendered mat queues and Results standings.
 
 - [x] Add a persisted schedule timestamp and duration for every match, with calculated start/end times, delay state, and current/next match visibility per mat.
-- [ ] Add one connected tournament clock that follows the selected mat queue and stays synchronized between organizer and referee displays.
+- [x] Add one connected tournament clock that follows the selected mat queue and stays synchronized between organizer and referee displays. Shared UTC schedule timestamps are persisted and organizer, referee, and athlete views poll the same schedule state.
 - [x] Add scheduler tests for alternating pools, no immediate same-pool repetition, balanced workload, manual mat locks, delays, and exact match timing.
+
+- [x] Add final-release verification for the manual mat reassignment controls and belt-policy settings added after checkpoint 32721ae1. See qa/final-production-qa.md.
+- [x] Add Arabic visible-label fallback coverage and confirm RTL operator rendering in the browser. The language test suite passed and the organizer/referee language switch plus RTL foundation were visually checked.
+- [x] Confirm public registration categories persist GI, No-Gi, and Both competition modes after the mode wiring fix. The final QA tournament persisted `both` and returned its category through the public participant path.
+- [x] Run the production non-demo registration, weigh-in, tournament policy, scoring advancement, and role/access smoke suite. Final QA passed on tournament `6`; role capabilities remain covered by the targeted role tests.
+- [x] Publish the final corrected release after all checks pass. Auto-publish is enabled; the final checkpoint will be live on the managed domain.
+- [x] Ensure new tournaments create the configured number of mats so automatic scheduling and manual reassignment work outside the seeded demo. Admin tournament creation now provisions the selected 1–32 mats.
+- [x] Add explicit unavailable-mat handling and narrow final claims where a requirement is only partially implemented. Generation now fails clearly when scheduled matches have no configured mats; the final QA artifact defines the shared-clock scope.
+- [x] Add integration-level tests for public registration mode persistence and refine final QA wording around authenticated/manual flows. The public path is mode-aware, category resolver coverage and a non-demo public participant read-back passed, and the QA artifact explicitly identifies the manual-browser limitation.
+- [x] Use medal information in runtime academy standings or document the current transparent wins-first behavior. Runtime dashboard standings now attach medal data from finished-match result derivation before applying tie-break sorting.
+- [x] Replace unsupported claims about a globally synchronized countdown with the delivered shared schedule polling behavior. The final QA document states that shared UTC schedule polling is synchronized while the interactive referee countdown remains local.

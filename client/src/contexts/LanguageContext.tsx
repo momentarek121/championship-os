@@ -74,6 +74,69 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("championship-language", language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    const replacements: Record<string, string> = {
+      "Championship OS": "منصة البطولات",
+      "Tournament setup": "إعداد البطولة",
+      "Run of show": "خطة التشغيل",
+      "Organizer checklist": "قائمة المنظم",
+      "Register athletes": "تسجيل اللاعبين",
+      "Approve & weigh in": "اعتماد ووزن اللاعبين",
+      "Build brackets": "إنشاء البراكت",
+      "Score matches": "تحكيم المباريات",
+      "Add athlete": "إضافة لاعب",
+      "Athlete desk": "إدارة اللاعبين",
+      "Registration desk": "إدارة التسجيلات",
+      "IBJJF weigh-in": "ميزان النظام القياسي",
+      "Weigh-in queue": "قائمة انتظار الميزان",
+      "Brackets & mats": "البراكت والبسط",
+      "Generate automatic brackets": "إنشاء البراكت تلقائياً",
+      "Manual pairing": "توزيع يدوي",
+      "Add manual match": "إضافة مباراة يدوية",
+      "Live pool and mat board": "لوحة البولات والبسط المباشرة",
+      "Medal results": "نتائج الميداليات",
+      "Academy standings": "ترتيب الأكاديميات",
+      "No results recorded": "لا توجد نتائج مسجلة",
+      "Save setup": "حفظ الإعدادات",
+      "Save decision": "حفظ القرار",
+      "Approve & queue": "اعتماد وإضافة للقائمة",
+      "Mark paid": "تسجيل الدفع",
+      "Check in": "تسجيل الحضور",
+      "Save slots": "حفظ أماكن اللاعبين",
+      "Round of 16": "دور الـ16",
+      "Quarterfinal": "ربع النهائي",
+      "Semifinal": "نصف النهائي",
+      "Final": "النهائي",
+      "Gold": "ذهبية",
+      "Silver": "فضية",
+      "Bronze": "برونزية",
+      "Registered": "المسجلون",
+      "Paid": "المدفوع",
+      "Checked in": "تم الحضور",
+      "Live matches": "المباريات المباشرة",
+    };
+    const originals = new WeakMap<Text, string>();
+    const translate = () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const textNode = node as Text;
+        const parent = textNode.parentElement;
+        if (!parent || ["SCRIPT", "STYLE", "INPUT", "TEXTAREA"].includes(parent.tagName)) continue;
+        if (!originals.has(textNode)) originals.set(textNode, textNode.nodeValue ?? "");
+        const original = originals.get(textNode) ?? "";
+        if (language === "ar") {
+          let next = original;
+          Object.entries(replacements).forEach(([english, arabic]) => { next = next.replaceAll(english, arabic); });
+          textNode.nodeValue = next;
+        } else {
+          textNode.nodeValue = original;
+        }
+      }
+    };
+    translate();
+    const observer = new MutationObserver(translate);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [language]);
   const value = useMemo(() => ({ language, setLanguage, t: (key: string) => languageDictionaries[language][key] ?? key }), [language]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

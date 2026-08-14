@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 export default function RefereeDesk() {
-  const dashboard = trpc.tournament.dashboard.useQuery(undefined, { retry: false });
+  const dashboard = trpc.tournament.dashboard.useQuery(undefined, { retry: false, refetchInterval: 3000 });
   const finishMatch = trpc.tournament.finishMatch.useMutation({
     onSuccess: () => { toast.success("Result saved and winner advanced"); dashboard.refetch(); },
     onError: error => toast.error(error.message),

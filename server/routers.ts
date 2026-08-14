@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
 import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
-import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
+import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, reassignMatchMat, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -17,6 +17,7 @@ const tournamentInput = z.object({
   weighInMode: z.enum(["ibjjf", "custom"]).default("ibjjf"),
   weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/).default("0.00"),
   competitionMode: z.enum(["gi", "nogi", "both"]).default("gi"),
+  mats: z.coerce.number().int().min(1).max(32).default(4),
 });
 
 export const appRouter = router({
@@ -47,7 +48,7 @@ export const appRouter = router({
   tournament: router({
     dashboard: staffProcedure.query(() => getTournamentDashboard()),
     clubs: adminProcedure.query(() => getClubs()),
-    create: adminProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id })),
+    create: adminProcedure.input(tournamentInput).mutation(({ input, ctx }) => { const { mats: matCount, ...tournament } = input; return createTournament({ ...tournament, matCount, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id }); }),
     seedDemo: adminProcedure.mutation(({ ctx }) => seedDemoTournament(ctx.user.id)),
     registerAthlete: registrationProcedure.input(z.object({
       tournamentId: z.number(),
@@ -74,10 +75,11 @@ export const appRouter = router({
       sport: "Brazilian Jiu-Jitsu",
     })),
     updateWeighIn: weighInProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
-    updateSettings: adminProcedure.input(z.object({ tournamentId: z.number(), organizationName: z.string().min(2), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/), competitionMode: z.enum(["gi", "nogi", "both"]).default("gi"), scaleNotes: z.string().max(1000).default("") })).mutation(({ input, ctx }) => updateTournamentSettings({ ...input, actorUserId: ctx.user.id })),
+    updateSettings: adminProcedure.input(z.object({ tournamentId: z.number(), organizationName: z.string().min(2), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/), competitionMode: z.enum(["gi", "nogi", "both"]).default("gi"), scaleNotes: z.string().max(1000).default(""), beltPolicy: z.array(z.string().min(1)).max(12).default([]) })).mutation(({ input, ctx }) => updateTournamentSettings({ ...input, actorUserId: ctx.user.id })),
     generateBrackets: bracketProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),
     createManualMatch: bracketProcedure.input(z.object({ tournamentId: z.number(), categoryId: z.number(), athleteAId: z.number(), athleteBId: z.number() })).mutation(({ input, ctx }) => createManualMatch({ ...input, actorUserId: ctx.user.id })),
     updateMatchSlots: bracketProcedure.input(z.object({ matchId: z.number(), athleteAId: z.number().nullable(), athleteBId: z.number().nullable() })).mutation(({ input, ctx }) => updateMatchSlots({ ...input, actorUserId: ctx.user.id })),
+    reassignMatchMat: bracketProcedure.input(z.object({ matchId: z.number(), matId: z.number().nullable() })).mutation(({ input, ctx }) => reassignMatchMat({ ...input, actorUserId: ctx.user.id })),
     finishMatch: refereeProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0), advantageA: z.number().int().min(0).default(0), advantageB: z.number().int().min(0).default(0), penaltyA: z.number().int().min(0).default(0), penaltyB: z.number().int().min(0).default(0), evaluation: z.string().max(500).optional() })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
     updateMatchStatus: refereeProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
     updateRegistration: staffProcedure.input(z.object({

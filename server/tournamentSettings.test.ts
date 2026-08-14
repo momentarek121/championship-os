@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTournamentSettings, setupChecklistReady } from "../shared/tournamentSettings";
+import { formatBeltPolicyNote, normalizeTournamentSettings, setupChecklistReady } from "../shared/tournamentSettings";
+import { resolveCategory } from "../shared/category";
 
 describe("tournament settings", () => {
   it("normalizes persisted organizer settings and scale notes", () => {
@@ -16,6 +17,18 @@ describe("tournament settings", () => {
       scaleNotes: "Scale 1 beside registration desk",
     });
     expect(setupChecklistReady(settings)).toBe(true);
+  });
+
+  it("formats selected belt policy notes, including children bands", () => {
+    expect(formatBeltPolicyNote(["No belt", "White", "Grey", "Black"])).toBe("Belt policy: No belt, White, Grey, Black; children may use organization-defined belt bands.");
+    expect(formatBeltPolicyNote()).toContain("No belt, White, Blue, Purple, Brown, Black");
+  });
+
+  it("separates GI, No-Gi, and Both category labels", () => {
+    const input = { age: 24, gender: "male" as const, belt: "Blue", weight: 76, sport: "BJJ" };
+    expect(resolveCategory({ ...input, competitionMode: "gi" }).name).toContain("/ GI /");
+    expect(resolveCategory({ ...input, competitionMode: "nogi" }).name).toContain("/ No-Gi /");
+    expect(resolveCategory({ ...input, competitionMode: "both" }).name).toContain("/ GI + No-Gi /");
   });
 
   it("rejects missing organization names and malformed tolerances", () => {

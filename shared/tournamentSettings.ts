@@ -18,6 +18,11 @@ export function normalizeTournamentSettings(input: TournamentSettingsInput): Tou
   };
 }
 
+export function formatBeltPolicyNote(selectedBelts: string[] = []) {
+  const belts = selectedBelts.length ? selectedBelts.join(", ") : "No belt, White, Blue, Purple, Brown, Black";
+  return `Belt policy: ${belts}; children may use organization-defined belt bands.`;
+}
+
 export function setupChecklistReady(settings: TournamentSettingsInput) {
   return Boolean(settings.organizationName.trim() && settings.weighInMode && /^\d+(\.\d{1,2})?$/.test(settings.weighInTolerance));
 }
