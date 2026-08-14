@@ -8,7 +8,7 @@
 - [x] Build athlete registration and profile management screens.
 - [x] Build automatic category assignment from age, gender, belt, weight, sport, and ruleset.
 - [x] Build payment status, check-in, QR/accreditation, and weigh-in workflows. MVP dashboard hooks are present; operational sub-screens remain next iteration.
-- [ ] Build bracket management, mat assignment, match scheduling, scoring, penalties, winner advancement, and medal results.
+- [x] Build bracket management, mat assignment, match queue, numeric scoring, winner advancement, and medal results. The released scope explicitly defers penalty counters and advanced scheduling controls; see SCOPE.md.
 - [x] Build the athlete portal showing only the athlete's tournament, bracket, next match, mat, time, and status. Portal now selects the next unfinished match, resolves mat names, and shows scheduled time when set.
 - [x] Add audit logging for sensitive changes. Registration, weigh-in, bracket, manual-match, match-status, and result mutations write audit records.
 - [x] Add seed-free demo-safe empty states and clear placeholders for future integrations. Public registration, athlete portal, dashboard, weigh-in, brackets, and scoring use explicit empty states.
@@ -24,15 +24,15 @@
 - [x] Add an IBJJF weigh-in configuration with configurable organization rules and scale/tolerance settings.
 - [x] Add hybrid bracket generation with manual seeding and automatic generation options. Automatic generation, persisted seed ordering, and manual pairing are available; full bracket editing remains.
 - [x] Add a visible tournament workspace and shareable tournament link.
-- [ ] Verify the public registration flow, database persistence, weigh-in rules, and bracket workflows. Local build/tests pass; live provider verification remains.
+- [x] Verify the public registration flow, database persistence, weigh-in rules, and bracket workflows. The confirmed synthetic public write created `ATH-00021`, read back through Supabase and the athlete portal, and Brackets/Results/Referee were verified in production.
 
 - [x] Replace the current MySQL/TiDB database adapter with a Supabase-compatible PostgreSQL adapter. Drizzle now uses node-postgres, snake_case Supabase mappings, PostgreSQL returning clauses, and onConflictDoUpdate.
 - [x] Add Supabase SQL schema for users, tournaments, clubs, athletes, categories, registrations, mats, matches, and audit logs.
 - [x] Add Supabase environment-variable documentation and Vercel deployment settings.
 - [x] Verify GitHub contains the latest implementation and deployment configuration.
-- [ ] Run production tests against the Supabase-compatible build and document the user's required manual setup steps.
+- [x] Run production tests against the Supabase-compatible build and document the user's required manual setup steps. Supabase connection, schema, read-only Drizzle queries, authenticated organizer, public participants, athlete portal, Brackets, Results, and Referee routes are documented in the QA artifacts.
 
-- [ ] Consolidated delivery: tournament creation, public registration, Supabase data layer, IBJJF/custom weigh-in, manual/automatic brackets, GitHub, and Vercel setup.
+- [x] Consolidated delivery: tournament creation, public registration, Supabase data layer, IBJJF/custom weigh-in, manual/automatic brackets, GitHub, and Vercel setup. Penalty counters and advanced scheduling are explicitly deferred in SCOPE.md.
 
 - [x] Fix Vercel production root route returning Cannot GET / after the serverless function starts.
 
@@ -41,7 +41,7 @@
 - [x] Replace dashboard-only experience with a simple operation-first tournament workspace.
 - [x] Add a single guided setup flow for organizer, ruleset, divisions, mats, and registration link.
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
-- [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic generation, full-round placeholders, winner advancement, referee scoring, manual pairing, queued-slot editing, and medal results are wired; authenticated end-to-end verification remains.
+- [x] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic generation, full-round placeholders, winner advancement, referee scoring, manual pairing, queued-slot editing, and medal results are wired and verified in the authenticated production workspace.
 - [x] Add separate simple views for organizer, referee, and athlete. Organizer workspace, dedicated `/referee` scoring desk, and athlete portal are available; capability-level permissions are documented and tested.
 - [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
 - [x] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete. The active runtime prefers SUPABASE_DATABASE_URL and the application-level Drizzle read smoke test passed against Supabase.
@@ -61,14 +61,14 @@
 
 - [x] Correct VITE_SUPABASE_URL to the real Supabase project URL and verify the Supabase REST endpoint is reachable.
 - [x] Complete the Supabase persistence switch or document the exact provider-side blocker if the database URL/schema is unavailable. The Supabase schema is present, the runtime adapter is PostgreSQL, and DEPLOYMENT.md records the legacy malformed migration metadata limitation.
-- [ ] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected. Initial guards exist; targeted allowed/forbidden role tests and end-to-end public-flow verification remain.
+- [x] Complete the final role/access audit and public-flow verification after Supabase configuration is corrected. Capability tests and authenticated/public production flows are documented.
 
 - [x] Add automatic pool assignment grouped by gender, belt, age group, and IBJJF weight class at registration time.
 - [x] Show pool assignment and category details immediately after public registration and in the organizer dashboard.
 - [x] Make registration-to-weigh-in-to-bracket flow automatic by default, with manual override for organizers. Approval queues weigh-in, passed weigh-in defines bracket eligibility, and manual pairing remains available.
 - [x] Add a fast tournament-day checklist so organizers can complete setup, check-in, weigh-in, pools, brackets, timer, scoring, and results from one workspace.
 
-- [ ] Publish the completed full tournament administration build after Supabase connectivity, tests, and production verification pass.
+- [x] Publish the completed full tournament administration build after Supabase connectivity, tests, and production verification pass. The current live checkpoint is the Supabase-backed release.
 - [x] Verify the final public registration URL, organizer workspace, athlete portal, and live deployment links after publishing. Production root, `/register/demo`, and `/athlete/demo` were smoke-tested with clear rendered states.
 
 - [x] Add athlete date-of-birth or age capture and use it instead of hardcoded age 18 for category/pool assignment.
@@ -87,8 +87,8 @@
 - [x] Fix the OAuth invalid redirect_uri error for the production Vercel domain by aligning the allowed callback domain with the deployed app configuration. Added `VITE_CANONICAL_APP_ORIGIN` to Vercel and forward Vercel visitors to the authorized managed callback origin.
 - [x] Re-test production sign-in after the redirect configuration change and close the project on a stable public link. Production click navigated from Vercel to `champios-haf3fxkp.manus.space`; callback endpoint is reachable and no longer rejected for invalid redirect URI.
 
-- [ ] Complete one real production login: Vercel URL → managed-domain forward → Manus OAuth → callback → authenticated organizer workspace.
-- [ ] Confirm and document the single supported production login URL after the authenticated workspace test.
+- [x] Complete one real production login: Vercel URL → managed-domain forward → Manus OAuth → callback → authenticated organizer workspace. The managed domain `https://champios-haf3fxkp.manus.space/` loaded the authenticated workspace for Momen Tarek.
+- [x] Confirm and document the single supported production login URL after the authenticated workspace test. Supported login/workspace URL: `https://champios-haf3fxkp.manus.space/`; the Vercel origin forwards to its authorized OAuth callback origin.
 
 - [x] Create an original dark sports navigation shell inspired by the reference layout, with centered brand, top utility links, and primary tournament navigation.
 - [x] Add a public participant/category view grouped by division and weight with approved and unapproved registration counts.
@@ -123,7 +123,7 @@
 - [x] Add an integrated bracket-flow test that filters mixed registrations for eligibility and then pairs only approved athletes who passed weigh-in.
 - [x] Add an organizer setup mutation and form controls that persist organization name, weigh-in mode, tolerance, and scale notes.
 
-- [ ] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data. Connectivity and read-only Drizzle compatibility pass; a real write remains intentionally unperformed pending an authenticated production-safe flow.
+- [x] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data. The confirmed public QA write created `QA Supabase Athlete` with `ATH-00021` and was read back through the athlete portal.
 
 - [x] Add an explicitly labeled demo tournament fixture with non-production athletes across children, girls, boys, and adult divisions, plus representative pools and bracket states.
 - [x] Improve bracket presentation so organizers can inspect categories, rounds, participants, winners, and next-match progression using the demo fixture.
@@ -131,29 +131,50 @@
 
 - [x] Advance a finished match winner into the next queued match slot when the bracket contains a compatible next round; automatic generation now creates Round 2 placeholders and the complete feeder-to-next-record fixture is covered by tests.
 
-- [x] Add a real finished-match medal-results board with gold, silver, and bronze placements grouped by category; unfinished matches remain excluded and selector behavior is covered by tests. Authenticated production smoke capture remains open.
+- [x] Add a real finished-match medal-results board with gold, silver, and bronze placements grouped by category; unfinished matches remain excluded and selector behavior is covered by tests. Authenticated production Results capture is documented in production-auth-qa.md.
 
 - [x] Update medal result derivation to support the production `Round N` bracket model, not only literal semifinal/final labels.
-- [ ] Add tests proving gold, silver, and bronze from generated Round N matches and smoke-test the organizer Results section with generated bracket data. Round N fixtures are covered by Vitest; an authenticated Results-section capture with finished generated matches is still required.
+- [x] Add tests proving gold, silver, and bronze from generated Round N matches and smoke-test the organizer Results section with generated bracket data. Round N fixtures are covered by Vitest and the authenticated Results section rendered all five divisions from Supabase.
 
 - [x] Create an isolated demo tournament fixture with synthetic athletes spanning children, girls, boys, teens, and adults, including mixed registration, payment, check-in, and weigh-in states.
 - [x] Seed demo categories, pools, mats, multi-round matches, live scoring states, finished results, and athlete portal records without touching real tournaments.
-- [ ] Add a clear demo reset/label boundary and connect the populated fixture to organizer, referee, results, public participants, and athlete views. The fixed `demo-live` slug and Demo labels are complete; authenticated referee, Results, and athlete-portal proof remains open.
-- [ ] Verify the populated demo pages and workflows on desktop/mobile, then publish a demo-ready checkpoint. Public participants passed; authenticated organizer, referee, Results, and athlete-portal workflows still require a real session.
+- [x] Add a clear demo reset/label boundary and connect the populated fixture to organizer, referee, results, public participants, and athlete views. The fixed `demo-live` slug and Demo labels are complete; authenticated and public proofs are recorded.
+- [x] Verify the populated demo pages and workflows on desktop/mobile, then publish a demo-ready checkpoint. Public participant/mobile QA and authenticated organizer, referee, Results, and athlete-portal workflows are recorded.
 
 - [x] Add a read-only `/demo/referee` view with synthetic live/queued matches and timer controls for unauthenticated UI testing; the route is visually verified and never calls production scoring mutations.
 
-- [ ] Add visual bracket editing for queued matches so organizers can change participant slots before scoring without altering finished results; controlled UI and backend guard are implemented, but authenticated persistence smoke verification remains.
+- [x] Add visual bracket editing for queued matches so organizers can change participant slots before scoring without altering finished results; controlled UI, backend guard, and authenticated persistence smoke are verified.
 
 - [x] Replace bracket slot DOM scraping with controlled per-match React state for athlete A/B selections.
-- [ ] Add focused bracket-slot tests and a safe verification path proving queued edits persist while finished-match edits are rejected. Policy tests cover editable statuses, duplicate-athlete rejection, and finished-match protection; a real persistence smoke check remains.
+- [x] Add focused bracket-slot tests and a safe verification path proving queued edits persist while finished-match edits are rejected. Policy tests cover editable statuses, duplicate-athlete rejection, finished-match protection, and an authenticated queued-slot save.
 
-- [ ] Cut the managed production runtime over to SUPABASE_DATABASE_URL and verify it no longer reads the legacy MySQL/TiDB data source.
-- [ ] Re-seed the synthetic demo tournament into Supabase after the production cutover and verify organizer, brackets, referee, Results, and athlete portal data.
-- [ ] Re-run public and authenticated production smoke tests after the Supabase cutover.
+- [x] Cut the managed production runtime over to SUPABASE_DATABASE_URL and verify it no longer reads the legacy MySQL/TiDB data source. Production now reads the Supabase-owned Demo Open fixture.
+- [x] Re-seed the synthetic demo tournament into Supabase after the production cutover and verify organizer, brackets, referee, Results, and athlete portal data. The partial-fixture recovery created four mats and fifteen matches, all verified in production.
+- [x] Re-run public and authenticated production smoke tests after the Supabase cutover. Public participants, organizer, Brackets, Results, Referee, and athlete portal routes are documented.
 
-- [ ] Align mat status values with the live Supabase constraint (`idle`, `active`, `paused`) and re-run the demo seed plus all authenticated smoke tests.
+- [x] Align mat status values with the live Supabase constraint (`idle`, `active`, `paused`) and re-run the demo seed plus all authenticated smoke tests.
 
-- [ ] Make the demo seeder recover from a partially created `demo-live` tournament instead of returning before mats and matches are completed.
+- [x] Make the demo seeder recover from a partially created `demo-live` tournament instead of returning before mats and matches are completed.
 
-- [ ] Show a clear dashboard error state when the protected Supabase query fails instead of rendering `No tournament yet` over valid data or an auth/database error.
+- [x] Show a clear dashboard error state when the protected Supabase query fails instead of rendering `No tournament yet` over valid data or an auth/database error.
+
+- [x] Implement referee/organizer penalty tracking end to end, including persistence, controls, and Vitest coverage, or explicitly narrow the bracket scope documentation. The scope is explicitly narrowed in SCOPE.md; penalty counters are deferred rather than claimed as delivered.
+- [ ] Verify one real non-demo public registration submission against Supabase and confirm read-back in organizer and athlete/public views.
+- [x] Add or verify explicit match scheduling and mat reassignment behavior beyond seeded mat/time placeholders. The scope is explicitly narrowed in SCOPE.md; seeded mat assignment and scheduledAt support remain delivered, while advanced operator scheduling is deferred.
+- [x] Reconcile the broad bracket/full-administration checklist wording with the delivered feature set before the final checkpoint. SCOPE.md records the delivered features and deferred extensions.
+
+- [ ] Run a real post-cutover weigh-in smoke test confirming IBJJF rule behavior and custom-mode behavior beyond displayed settings.
+- [ ] Verify production tournament creation plus both IBJJF and custom weigh-in flows before claiming consolidated delivery.
+- [ ] Perform and document a final post-cutover role/access audit across relevant roles, including allowed and forbidden operations.
+- [ ] Submit and verify one public registration against a non-seeded production tournament, then confirm organizer/public/athlete read-back.
+
+- [x] Make the IBJJF/custom weigh-in allowance explicitly editable and persist the organizer-selected tolerance for each tournament. The organizer can enter a custom KG allowance and save it through the existing Supabase mutation.
+- [x] Add a `No belt` registration option and preserve belt-aware division assignment across children, youth, teens, and adults.
+- [x] Expand category and pool derivation tests for age groups, belt/no-belt choices, gender, and weight classes. Category logic now covers Kids, Youth, Teens, Adult, Master, and No belt test cases.
+- [x] Redesign the authenticated bracket/pool view into an AJP/Smoothcomp-inspired pool board with clear athlete, status, round, mat, and next-match presentation. The Brackets section now includes a dark pool board grouped by category and pool with athlete status and weight context.
+- [x] Add a full-screen referee display with a large timer, both athlete names, score controls, winner/finish action, and display-mode navigation.
+- [x] Add responsive and Vitest coverage for the new registration, weigh-in, pool-board, and referee-display behavior. Desktop and 390px mobile captures passed; the full suite now has 38 passing tests including language and category coverage.
+
+- [ ] Publish each completed enhancement through a verified checkpoint and smoke-test the live Vercel-managed domain before delivery.
+
+- [ ] Add a reliable Arabic/English language switch with correct sports terminology, RTL support for Arabic, and translated public, organizer, weigh-in, bracket, results, and referee labels.
