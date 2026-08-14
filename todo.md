@@ -283,7 +283,7 @@
 - [x] Fix the homepage registration CTA so clicking it reaches the public registration route and form instead of remaining on the homepage fallback. The CTA now uses the absolute canonical URL `https://egyptbjj.vercel.app/register/demo`, so it leaves Manus Preview and stale deployment hosts.
 - [x] Diagnose and improve the Manus project preview Loading state, or clearly separate preview-only issues from the public Vercel visitor flow. The screenshot is the Manus Management UI Preview pane, not the public app; the public Vercel homepage and CTA were verified separately.
 - [x] Remove Manus as a required organizer login dependency and provide an independent owner authentication flow. The client/server code now uses Supabase Auth Google/email/phone paths; provider credentials and final login smoke test remain pending.
-- [x] Create or select a real active tournament record with a production registration URL that persists athlete submissions in Supabase. Supabase contains live tournament id `1`, name `بطوله الجمهوريه ببورسعيد`, status `live`, and slug `portsaid-bjj-championship`; end-to-end write verification remains a launch smoke test.
+- [x] Create or select a real active tournament record with a production registration URL that persists athlete submissions in Supabase. Supabase now contains production tournament id `7`, name `بطولة بورسعيد BJJ Championship`, status `registration`, and slug `portsaid-bjj-championship`; end-to-end write verification remains a launch smoke test.
 - [ ] Verify the complete athlete registration and organizer access flow urgently before tournament use.
 - [ ] Collect Google OAuth Client ID and Client Secret or proceed with Email Magic Link fallback for independent organizer login.
 - [ ] Complete the urgent launch smoke test: real Port Said registration form, Supabase persistence, and organizer access without Manus.
@@ -291,4 +291,5 @@
 - [ ] Complete Google OAuth provider setup and verify independent organizer login.
 - [ ] Verify the real Port Said registration route and database persistence before launch handoff.
 - [ ] Finish the urgent production registration/API and independent Google OAuth blockers, then run end-to-end smoke tests before declaring launch readiness.
-- [ ] Repair the Vercel API handler/rewrite so public tRPC requests return a real JSON response instead of HTTP 200 with an empty body.
+- [x] Repair the Vercel API handler/rewrite so public tRPC requests return a real JSON response instead of HTTP 200 with an empty body. Vercel Production now returns HTTP 200 JSON for the Port Said lookup after the explicit handler and rewrite repair.
+- [x] Create or restore the real Port Said production tournament row in the active Supabase database; created Supabase tournament id 7 with exact slug `portsaid-bjj-championship` and four configured mats, then verified live lookup returns the real event.
