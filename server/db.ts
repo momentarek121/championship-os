@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { calculateAge, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
 import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
@@ -109,7 +109,7 @@ export async function getTournamentDashboard() {
   const db = await getDb();
   if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
   const [tournamentRows, athleteRows, registrationRows, matchRows, categoryRows] = await Promise.all([
-    db.select().from(tournaments),
+    db.select().from(tournaments).orderBy(desc(tournaments.id)),
     db.select().from(athletes),
     db.select().from(registrations).orderBy(asc(registrations.id)),
     db.select().from(matches),
@@ -328,4 +328,53 @@ export async function createManualMatch(input: { tournamentId: number; categoryI
   const result = await db.insert(matches).values({ tournamentId: input.tournamentId, categoryId: input.categoryId, round: "Manual", matchNumber: count.length + 1, athleteAId: input.athleteAId, athleteBId: input.athleteBId, status: "queued" });
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "tournament", entityId: input.tournamentId, action: "manual_match", afterValue: JSON.stringify(input) });
   return Number(result[0].insertId);
+}
+
+
+export async function seedDemoTournament(actorUserId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const existing = await db.select().from(tournaments).where(eq(tournaments.registrationSlug, "demo-live")).limit(1);
+  if (existing[0]) return { tournamentId: existing[0].id, created: false, message: "Demo tournament already exists" } as const;
+  const tournamentResult = await db.insert(tournaments).values({ name: "Championship OS Demo Open", sport: "Brazilian Jiu-Jitsu", location: "Demo Arena", status: "live", ruleset: "IBJJF Standard", organizationName: "Championship OS Demo", registrationSlug: "demo-live", weighInMode: "ibjjf", weighInTolerance: "0.00", scaleNotes: "DEMO ONLY · Use the digital scale at Mat 1", createdBy: actorUserId });
+  const tournamentId = Number(tournamentResult[0].insertId);
+  const divisions = [
+    { name: "Kids · Boys · White · -30 KG", ageGroup: "Kids", gender: "male" as const, belt: "White", weightLimit: "30.00", count: 4 },
+    { name: "Girls · Youth · White · -45 KG", ageGroup: "Youth", gender: "female" as const, belt: "White", weightLimit: "45.00", count: 4 },
+    { name: "Boys · Teens · Blue · -60 KG", ageGroup: "Teens", gender: "male" as const, belt: "Blue", weightLimit: "60.00", count: 4 },
+    { name: "Women · Adult · Blue · -65 KG", ageGroup: "Adult", gender: "female" as const, belt: "Blue", weightLimit: "65.00", count: 4 },
+    { name: "Men · Adult · All belts · -76 KG", ageGroup: "Adult", gender: "male" as const, belt: "Purple", weightLimit: "76.00", count: 4 },
+  ];
+  const names = ["Adam Demo", "Omar Demo", "Youssef Demo", "Karim Demo", "Lina Demo", "Mariam Demo", "Nada Demo", "Salma Demo", "Ziad Demo", "Hassan Demo", "Seif Demo", "Ali Demo", "Hana Demo", "Jana Demo", "Mira Demo", "Dina Demo", "Mostafa Demo", "Amr Demo", "Tarek Demo", "Khaled Demo"];
+  const athletesByCategory: Array<{ categoryId: number; athleteIds: number[] }> = [];
+  let nameIndex = 0;
+  for (const [divisionIndex, division] of Array.from(divisions.entries())) {
+    const categoryResult = await db.insert(categories).values({ tournamentId, name: division.name, ageGroup: division.ageGroup, gender: division.gender, belt: division.belt, weightLimit: division.weightLimit, sport: "Brazilian Jiu-Jitsu" });
+    const categoryId = Number(categoryResult[0].insertId);
+    const athleteIds: number[] = [];
+    for (let index = 0; index < division.count; index += 1) {
+      const dateOfBirth = new Date(Date.UTC(2015 - divisionIndex * 3, 4, 10 + index));
+      const athleteResult = await db.insert(athletes).values({ fullName: names[nameIndex++], email: `demo${nameIndex}@example.test`, phone: `01000000${String(nameIndex).padStart(3, "0")}`, dateOfBirth, gender: division.gender, belt: division.belt, expectedWeight: division.weightLimit, actualWeight: index === 3 ? String(Number(division.weightLimit) + 1.2) : division.weightLimit });
+      const athleteId = Number(athleteResult[0].insertId);
+      athleteIds.push(athleteId);
+      const isOverweight = index === 3;
+      const isApproved = index < 3;
+      await db.insert(registrations).values({ tournamentId, athleteId, categoryId, seed: index + 1, status: isApproved ? "approved" : "pending", paymentStatus: index === 2 ? "unpaid" : "paid", checkInStatus: isApproved ? "checked_in" : "not_checked_in", weighInStatus: isOverweight ? "overweight" : (isApproved ? "passed" : "pending"), weighInNotes: isOverweight ? "DEMO · Over class limit" : "DEMO · Verified", accreditationCode: `DEMO-${String(athleteId).padStart(5, "0")}` });
+    }
+    athletesByCategory.push({ categoryId, athleteIds });
+  }
+  const matIds: number[] = [];
+  for (const name of ["Mat 1", "Mat 2", "Mat 3", "Mat 4"]) {
+    const result = await db.insert(mats).values({ tournamentId, name, status: name === "Mat 1" ? "live" : "available" });
+    matIds.push(Number(result[0].insertId));
+  }
+  let matchNumber = 1;
+  for (const [index, group] of Array.from(athletesByCategory.entries())) {
+    const [a, b, c] = group.athleteIds;
+    await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[index % matIds.length], round: "Round 1", matchNumber: matchNumber++, athleteAId: a, athleteBId: b, scoreA: 4, scoreB: 0, winnerId: a, status: "finished", finishedAt: new Date() });
+    await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[(index + 1) % matIds.length], round: "Round 1", matchNumber: matchNumber++, athleteAId: c, athleteBId: null, scoreA: 0, scoreB: 0, status: index === 0 ? "live" : "queued" });
+    await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, matId: matIds[index % matIds.length], round: "Round 2", matchNumber: matchNumber++, athleteAId: a, athleteBId: c, scoreA: index === 0 ? 2 : 8, scoreB: index === 0 ? 0 : 6, winnerId: index === 0 ? null : a, status: index === 0 ? "queued" : "finished", finishedAt: index === 0 ? null : new Date() });
+  }
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: JSON.stringify({ demo: true, divisions: divisions.map(division => division.name), athletes: names.length }) });
+  return { tournamentId, created: true, message: "Demo tournament seeded" } as const;
 }

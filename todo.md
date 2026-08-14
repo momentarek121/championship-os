@@ -130,3 +130,13 @@
 - [x] Verify demo data is isolated from real registrations and publish the demo inspection release. Desktop and mobile captures passed; fixture is static and demo-labeled.
 
 - [x] Advance a finished match winner into the next queued match slot when the bracket contains a compatible next round; automatic generation now creates Round 2 placeholders and the complete feeder-to-next-record fixture is covered by tests.
+
+- [x] Add a real finished-match medal-results board with gold, silver, and bronze placements grouped by category; unfinished matches remain excluded and selector behavior is covered by tests. Authenticated production smoke capture remains open.
+
+- [x] Update medal result derivation to support the production `Round N` bracket model, not only literal semifinal/final labels.
+- [ ] Add tests proving gold, silver, and bronze from generated Round N matches and smoke-test the organizer Results section with generated bracket data. Round N fixtures are covered by Vitest; an authenticated Results-section capture with finished generated matches is still required.
+
+- [x] Create an isolated demo tournament fixture with synthetic athletes spanning children, girls, boys, teens, and adults, including mixed registration, payment, check-in, and weigh-in states.
+- [x] Seed demo categories, pools, mats, multi-round matches, live scoring states, finished results, and athlete portal records without touching real tournaments.
+- [ ] Add a clear demo reset/label boundary and connect the populated fixture to organizer, referee, results, public participants, and athlete views. The fixed `demo-live` slug and Demo labels are complete; authenticated referee, Results, and athlete-portal proof remains open.
+- [ ] Verify the populated demo pages and workflows on desktop/mobile, then publish a demo-ready checkpoint. Public participants passed; authenticated organizer, referee, Results, and athlete-portal workflows still require a real session.

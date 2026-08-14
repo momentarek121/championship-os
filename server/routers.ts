@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
 import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
-import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
+import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -47,6 +47,7 @@ export const appRouter = router({
     dashboard: staffProcedure.query(() => getTournamentDashboard()),
     clubs: adminProcedure.query(() => getClubs()),
     create: adminProcedure.input(tournamentInput).mutation(({ input, ctx }) => createTournament({ ...input, registrationSlug: nanoid(10).toLowerCase(), createdBy: ctx.user.id })),
+    seedDemo: adminProcedure.mutation(({ ctx }) => seedDemoTournament(ctx.user.id)),
     registerAthlete: registrationProcedure.input(z.object({
       tournamentId: z.number(),
       fullName: z.string().min(2),
