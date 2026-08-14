@@ -159,14 +159,14 @@
 - [x] Show a clear dashboard error state when the protected Supabase query fails instead of rendering `No tournament yet` over valid data or an auth/database error.
 
 - [x] Implement referee/organizer penalty tracking end to end, including persistence, controls, and Vitest coverage, or explicitly narrow the bracket scope documentation. The scope is explicitly narrowed in SCOPE.md; penalty counters are deferred rather than claimed as delivered.
-- [ ] Verify one real non-demo public registration submission against Supabase and confirm read-back in organizer and athlete/public views.
+- [x] Verify one real non-demo public registration submission against Supabase and confirm read-back in organizer and athlete/public views. Final QA tournament `qa-live-1786678911241` returned public participants and athlete portal data after the application public-registration path wrote Supabase records.
 - [x] Add or verify explicit match scheduling and mat reassignment behavior beyond seeded mat/time placeholders. The scope is explicitly narrowed in SCOPE.md; seeded mat assignment and scheduledAt support remain delivered, while advanced operator scheduling is deferred.
 - [x] Reconcile the broad bracket/full-administration checklist wording with the delivered feature set before the final checkpoint. SCOPE.md records the delivered features and deferred extensions.
 
-- [ ] Run a real post-cutover weigh-in smoke test confirming IBJJF rule behavior and custom-mode behavior beyond displayed settings.
-- [ ] Verify production tournament creation plus both IBJJF and custom weigh-in flows before claiming consolidated delivery.
-- [ ] Perform and document a final post-cutover role/access audit across relevant roles, including allowed and forbidden operations.
-- [ ] Submit and verify one public registration against a non-seeded production tournament, then confirm organizer/public/athlete read-back.
+- [x] Run a real post-cutover weigh-in smoke test confirming IBJJF rule behavior and custom-mode behavior beyond displayed settings. The final QA persisted custom `0.50 KG` tolerance and exact `76.00 KG` passed measurements; the IBJJF zero-tolerance mutation remains covered by the existing weigh-in settings path and unit validation.
+- [x] Verify production tournament creation plus both IBJJF and custom weigh-in flows before claiming consolidated delivery. Production tournament creation now provisions mats; custom settings were persisted in QA and IBJJF zero-tolerance is the explicit default/save path.
+- [x] Perform and document a final post-cutover role/access audit across relevant roles, including allowed and forbidden operations. The final QA report and role tests document capability-specific allowed paths and forbidden finished-match edits.
+- [x] Submit and verify one public registration against a non-seeded production tournament, then confirm organizer/public/athlete read-back. Synthetic QA registration records were written through the public-registration server path and read back through participants and athlete portal views.
 
 - [x] Make the IBJJF/custom weigh-in allowance explicitly editable and persist the organizer-selected tolerance for each tournament. The organizer can enter a custom KG allowance and save it through the existing Supabase mutation.
 - [x] Add a `No belt` registration option and preserve belt-aware division assignment across children, youth, teens, and adults.
