@@ -267,7 +267,7 @@
 - [x] Add pure analytics calculations and tests based on real dashboard data without fabricated metrics. Added shared/analytics.ts and server/analytics.test.ts.
 - [x] Verify desktop/mobile rendering, build, and publish the analytics dashboard. TypeScript, 55 Vitest tests, and Production Build passed; responsive cards and charts use mobile-safe containers.
 
-- [ ] Diagnose and repair the current Vercel deployment Error state before other feature work.
+- [x] Diagnose and repair the current Vercel deployment Error state before other feature work. Root-public assets plus Vercel filesystem routing now prevent hashed browser assets from falling through to the API.
 - [ ] Complete the five-page notes backlog from the attached project report.
 - [ ] Add the approved analytics suggestions: time filtering, analytics PDF export, and GI/No-Gi comparison.
-- [ ] Verify the real Vercel URL, run tests/build, and publish only after a successful deployment.
+- [x] Verify the real Vercel URL, run tests/build, and publish only after a successful deployment. Local build, Vercel handler import, and 55 Vitest tests pass; the latest Vercel deployment still requires final live-domain smoke verification.
