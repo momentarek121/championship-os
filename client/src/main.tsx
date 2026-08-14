@@ -72,10 +72,21 @@ const trpcClient = trpc.createClient({
   ],
 });
 
-createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </trpc.Provider>
-);
+const mountApp = () => {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) return;
+
+  createRoot(rootElement).render(
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountApp, { once: true });
+} else {
+  mountApp();
+}
