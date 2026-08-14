@@ -293,3 +293,4 @@
 - [ ] Finish the urgent production registration/API and independent Google OAuth blockers, then run end-to-end smoke tests before declaring launch readiness.
 - [x] Repair the Vercel API handler/rewrite so public tRPC requests return a real JSON response instead of HTTP 200 with an empty body. Vercel Production now returns HTTP 200 JSON for the Port Said lookup after the explicit handler and rewrite repair.
 - [x] Create or restore the real Port Said production tournament row in the active Supabase database; created Supabase tournament id 7 with exact slug `portsaid-bjj-championship` and four configured mats, then verified live lookup returns the real event.
+- [ ] Repair the reported public Port Said registration link that does not respond when opened or clicked, then verify the live form in a fresh browser session.

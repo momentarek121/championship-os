@@ -1,36 +1,86 @@
 <!doctype html>
 <html lang="en">
-
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Championship OS</title>    
-    <!-- THIS IS THE START OF A COMMENT BLOCK, BLOCK TO BE DELETED: Google Fonts here, example:
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    THIS IS THE END OF A COMMENT BLOCK, BLOCK TO BE DELETED -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Championship OS</title>
+    <style>
+      :root { color-scheme: dark; font-family: Arial, sans-serif; }
+      body { margin: 0; background: #07111f; color: #fff; }
+      .fallback-shell { min-height: 100vh; box-sizing: border-box; display: grid; place-items: center; padding: 24px; }
+      .fallback-card { width: min(720px, 100%); box-sizing: border-box; background: #fff; color: #0f172a; border-radius: 20px; padding: 28px; box-shadow: 0 24px 80px #0006; }
+      .fallback-brand { display: inline-block; background: #d7ff54; color: #07111f; padding: 8px 12px; border-radius: 999px; font-weight: 800; letter-spacing: .08em; }
+      .fallback-title { margin: 20px 0 8px; font-size: clamp(30px, 6vw, 52px); line-height: 1.05; }
+      .fallback-muted { color: #64748b; line-height: 1.6; }
+      .fallback-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
+      .fallback-grid .wide { grid-column: 1 / -1; }
+      .fallback-label { display: grid; gap: 6px; color: #334155; font-size: 14px; font-weight: 700; }
+      .fallback-input, .fallback-select { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #0f172a; font: inherit; }
+      .fallback-button { border: 0; border-radius: 10px; padding: 13px 18px; background: #07111f; color: #fff; font-weight: 800; cursor: pointer; }
+      .fallback-button:disabled { opacity: .6; cursor: wait; }
+      .fallback-status { min-height: 24px; margin-top: 14px; color: #475569; }
+      .fallback-success { color: #047857; font-weight: 800; }
+      .fallback-error { color: #b91c1c; font-weight: 700; }
+      @media (max-width: 640px) { .fallback-grid { grid-template-columns: 1fr; } .fallback-grid .wide { grid-column: auto; } .fallback-card { padding: 22px; } }
+    </style>
   </head>
-
   <body>
     <div id="root">
-      <main style="min-height:100vh;background:#07111f;color:#fff;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;text-align:center">
-        <section style="max-width:620px">
-          <div style="display:inline-block;background:#d7ff54;color:#07111f;padding:8px 12px;border-radius:999px;font-weight:800;letter-spacing:.08em">CHAMPIONSHIP OS</div>
-          <h1 style="font-size:clamp(32px,6vw,64px);line-height:1.05;margin:24px 0 12px">Tournament management, made simple.</h1>
-          <p style="color:#cbd5e1;font-size:18px;line-height:1.7;margin:0">إدارة التسجيل والموازين والبراكت والمباريات والنتائج من مكان واحد.</p>
-          <p style="color:#94a3b8;margin:18px 0 0">Loading the workspace… If the page does not continue, use the public registration link below.</p>
-          <a href="https://egyptbjj.vercel.app/register/portsaid-bjj-championship" style="display:inline-block;margin-top:24px;background:#d7ff54;color:#07111f;padding:14px 22px;border-radius:12px;font-weight:800;text-decoration:none">Open registration / فتح التسجيل</a>
+      <main class="fallback-shell">
+        <section class="fallback-card" id="fallback-content">
+          <div class="fallback-brand">CHAMPIONSHIP OS</div>
+          <h1 class="fallback-title">Tournament management, made simple.</h1>
+          <p class="fallback-muted">إدارة التسجيل والموازين والبراكت والمباريات والنتائج من مكان واحد.</p>
+          <p class="fallback-muted">Loading the workspace… إذا لم تفتح الواجهة، استخدم التسجيل المباشر بالأسفل.</p>
+          <a id="fallback-home-link" href="https://egyptbjj.vercel.app/register/portsaid-bjj-championship" style="display:inline-block;margin-top:18px;background:#d7ff54;color:#07111f;padding:13px 18px;border-radius:10px;font-weight:800;text-decoration:none">Open registration / فتح التسجيل</a>
         </section>
       </main>
     </div>
+    <script>
+      (() => {
+        const path = window.location.pathname;
+        if (!path.startsWith('/register/')) return;
+        const slug = path.split('/').filter(Boolean)[1] || 'portsaid-bjj-championship';
+        const content = document.getElementById('fallback-content');
+        if (!content) return;
+        content.innerHTML = `
+          <div class="fallback-brand">CHAMPIONSHIP OS</div>
+          <h1 class="fallback-title">بطولة بورسعيد BJJ Championship</h1>
+          <p class="fallback-muted">Public athlete registration · تسجيل اللاعب العام</p>
+          <form id="fallback-registration-form" class="fallback-grid">
+            <label class="fallback-label wide">Full name / الاسم بالكامل<input class="fallback-input" name="fullName" required placeholder="Ahmed Mohamed" /></label>
+            <label class="fallback-label">Email / البريد الإلكتروني<input class="fallback-input" type="email" name="email" placeholder="athlete@email.com" /></label>
+            <label class="fallback-label">Phone / الهاتف<input class="fallback-input" name="phone" placeholder="01xxxxxxxxx" /></label>
+            <label class="fallback-label">Date of birth / تاريخ الميلاد<input class="fallback-input" type="date" name="dateOfBirth" required /></label>
+            <label class="fallback-label">Gender / النوع<select class="fallback-select" name="gender"><option value="male">Male / ذكر</option><option value="female">Female / أنثى</option></select></label>
+            <label class="fallback-label">Belt / الحزام<select class="fallback-select" name="belt"><option>No belt</option><option selected>White</option><option>Blue</option><option>Purple</option><option>Brown</option><option>Black</option></select></label>
+            <label class="fallback-label">Expected weight KG / الوزن المتوقع<input class="fallback-input" type="number" step="0.1" min="1" name="expectedWeight" required placeholder="76.8" /></label>
+            <label class="fallback-label">Competition mode / نوع المنافسة<select class="fallback-select" name="competitionMode"><option value="gi">GI</option><option value="nogi">No-Gi</option><option value="both">Both / كلاهما</option></select></label>
+            <div class="wide"><button class="fallback-button" type="submit">Submit registration / إرسال التسجيل</button><div id="fallback-status" class="fallback-status"></div></div>
+          </form>`;
+        const form = document.getElementById('fallback-registration-form');
+        const status = document.getElementById('fallback-status');
+        form?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const button = form.querySelector('button');
+          if (button) button.disabled = true;
+          if (status) { status.className = 'fallback-status'; status.textContent = 'Saving registration… جارٍ حفظ التسجيل'; }
+          const values = Object.fromEntries(new FormData(form).entries());
+          const payload = { slug, fullName: String(values.fullName || ''), email: String(values.email || ''), phone: String(values.phone || ''), dateOfBirth: String(values.dateOfBirth || ''), gender: String(values.gender || 'male'), belt: String(values.belt || 'White'), expectedWeight: Number(values.expectedWeight), competitionMode: String(values.competitionMode || 'gi') };
+          try {
+            const response = await fetch('/api/trpc/publicRegistration.submit?batch=1', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ 0: { json: payload } }) });
+            const result = await response.json();
+            if (!response.ok || result?.[0]?.error) throw new Error(result?.[0]?.error?.json?.message || 'Could not save registration');
+            if (status) { status.className = 'fallback-status fallback-success'; status.textContent = 'Registration received · تم استلام التسجيل بنجاح'; }
+            form.reset();
+          } catch (error) {
+            if (status) { status.className = 'fallback-status fallback-error'; status.textContent = error instanceof Error ? error.message : 'Could not save registration'; }
+            if (button) button.disabled = false;
+          }
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
-    <script
-      defer
-      src="%VITE_ANALYTICS_ENDPOINT%/umami"
-      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
+    <script defer src="%VITE_ANALYTICS_ENDPOINT%/umami" data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
   </body>
-
 </html>
