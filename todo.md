@@ -280,5 +280,5 @@
 - [x] Add a clear database-outage status page/state with retry and public guidance. Public registration now shows a bilingual outage card with retry and homepage navigation.
 - [x] Verify the Vercel visitor link and registration route do not require Vercel or organizer authentication. The primary Vercel homepage renders the CTA without login; `/register/demo` is a public route.
 - [x] Add a bounded timeout to public registration data loading so a stalled database request transitions to the outage state instead of remaining on Loading indefinitely. Added a five-second timeout and disabled query retries.
-- [ ] Fix the homepage registration CTA so clicking it reaches the public registration route and form instead of remaining on the homepage fallback.
-- [ ] Diagnose and improve the Manus project preview Loading state, or clearly separate preview-only issues from the public Vercel visitor flow.
+- [x] Fix the homepage registration CTA so clicking it reaches the public registration route and form instead of remaining on the homepage fallback. The CTA now uses the absolute canonical URL `https://egyptbjj.vercel.app/register/demo`, so it leaves Manus Preview and stale deployment hosts.
+- [x] Diagnose and improve the Manus project preview Loading state, or clearly separate preview-only issues from the public Vercel visitor flow. The screenshot is the Manus Management UI Preview pane, not the public app; the public Vercel homepage and CTA were verified separately.
