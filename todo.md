@@ -122,3 +122,5 @@
 
 - [x] Add an integrated bracket-flow test that filters mixed registrations for eligibility and then pairs only approved athletes who passed weigh-in.
 - [x] Add an organizer setup mutation and form controls that persist organization name, weigh-in mode, tolerance, and scale notes.
+
+- [ ] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data.
