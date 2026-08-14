@@ -4,6 +4,7 @@ import { selectBracketEligible } from "../shared/operationFlow";
 import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
 import { normalizeTournamentSettings } from "../shared/tournamentSettings";
 import { selectNextMatch } from "../shared/athletePortal";
+import { canEditMatchSlots, validateMatchSlots } from "../shared/matchEditing";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, tournaments, athletes, clubs, registrations, categories, matches, mats, auditLogs } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -377,4 +378,18 @@ export async function seedDemoTournament(actorUserId: number) {
   }
   await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "seed_demo", afterValue: JSON.stringify({ demo: true, divisions: divisions.map(division => division.name), athletes: names.length }) });
   return { tournamentId, created: true, message: "Demo tournament seeded" } as const;
+}
+
+
+export async function updateMatchSlots(input: { matchId: number; athleteAId: number | null; athleteBId: number | null; actorUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const slotValidation = validateMatchSlots(input.athleteAId, input.athleteBId);
+  if (!slotValidation.ok) throw new Error(slotValidation.reason);
+  const existing = await db.select().from(matches).where(eq(matches.id, input.matchId)).limit(1);
+  if (!existing[0]) throw new Error("Match not found");
+  if (!canEditMatchSlots(existing[0].status)) throw new Error("Finished matches cannot be edited");
+  await db.update(matches).set({ athleteAId: input.athleteAId, athleteBId: input.athleteBId }).where(eq(matches.id, input.matchId));
+  await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "edit_slots", beforeValue: JSON.stringify({ athleteAId: existing[0].athleteAId, athleteBId: existing[0].athleteBId }), afterValue: JSON.stringify({ athleteAId: input.athleteAId, athleteBId: input.athleteBId }) });
+  return { success: true } as const;
 }

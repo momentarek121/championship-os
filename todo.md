@@ -41,7 +41,7 @@
 - [x] Replace dashboard-only experience with a simple operation-first tournament workspace.
 - [x] Add a single guided setup flow for organizer, ruleset, divisions, mats, and registration link.
 - [x] Add usable athlete registration, check-in, weigh-in, payment status, and category assignment workflows.
-- [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic generation, full-round placeholders, winner advancement, referee scoring, and manual pairing are wired; visual bracket editing and medal results remain.
+- [ ] Add usable bracket generation, bracket editing, match queue, referee scoring, win/loss, and automatic advancement. Automatic generation, full-round placeholders, winner advancement, referee scoring, manual pairing, queued-slot editing, and medal results are wired; authenticated end-to-end verification remains.
 - [x] Add separate simple views for organizer, referee, and athlete. Organizer workspace, dedicated `/referee` scoring desk, and athlete portal are available; capability-level permissions are documented and tested.
 - [x] Fix current Vercel managed runtime still starting with stale dist/index.js and verify the live production deployment. Latest Vercel deployment is Ready/Production; direct deployment and cache-busted custom domain both mount the current build.
 - [ ] Replace the current MySQL/TiDB data layer with a real Supabase/PostgreSQL data layer before declaring Supabase integration complete.
@@ -142,3 +142,8 @@
 - [ ] Verify the populated demo pages and workflows on desktop/mobile, then publish a demo-ready checkpoint. Public participants passed; authenticated organizer, referee, Results, and athlete-portal workflows still require a real session.
 
 - [x] Add a read-only `/demo/referee` view with synthetic live/queued matches and timer controls for unauthenticated UI testing; the route is visually verified and never calls production scoring mutations.
+
+- [ ] Add visual bracket editing for queued matches so organizers can change participant slots before scoring without altering finished results; controlled UI and backend guard are implemented, but authenticated persistence smoke verification remains.
+
+- [x] Replace bracket slot DOM scraping with controlled per-match React state for athlete A/B selections.
+- [ ] Add focused bracket-slot tests and a safe verification path proving queued edits persist while finished-match edits are rejected. Policy tests cover editable statuses, duplicate-athlete rejection, and finished-match protection; a real persistence smoke check remains.

@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
 import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
-import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
+import { createAthleteRegistration, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
   name: z.string().min(2),
@@ -76,6 +76,7 @@ export const appRouter = router({
     updateSettings: adminProcedure.input(z.object({ tournamentId: z.number(), organizationName: z.string().min(2), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/), scaleNotes: z.string().max(1000).default("") })).mutation(({ input, ctx }) => updateTournamentSettings({ ...input, actorUserId: ctx.user.id })),
     generateBrackets: bracketProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),
     createManualMatch: bracketProcedure.input(z.object({ tournamentId: z.number(), categoryId: z.number(), athleteAId: z.number(), athleteBId: z.number() })).mutation(({ input, ctx }) => createManualMatch({ ...input, actorUserId: ctx.user.id })),
+    updateMatchSlots: bracketProcedure.input(z.object({ matchId: z.number(), athleteAId: z.number().nullable(), athleteBId: z.number().nullable() })).mutation(({ input, ctx }) => updateMatchSlots({ ...input, actorUserId: ctx.user.id })),
     finishMatch: refereeProcedure.input(z.object({ matchId: z.number(), winnerId: z.number(), scoreA: z.number().int().min(0), scoreB: z.number().int().min(0) })).mutation(({ input, ctx }) => finishMatch({ ...input, actorUserId: ctx.user.id })),
     updateMatchStatus: refereeProcedure.input(z.object({ matchId: z.number(), status: z.enum(["queued", "called", "live", "no_show"]) })).mutation(({ input, ctx }) => updateMatchStatus(input.matchId, input.status, ctx.user.id)),
     updateRegistration: staffProcedure.input(z.object({
