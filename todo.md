@@ -280,3 +280,5 @@
 - [x] Add a clear database-outage status page/state with retry and public guidance. Public registration now shows a bilingual outage card with retry and homepage navigation.
 - [x] Verify the Vercel visitor link and registration route do not require Vercel or organizer authentication. The primary Vercel homepage renders the CTA without login; `/register/demo` is a public route.
 - [x] Add a bounded timeout to public registration data loading so a stalled database request transitions to the outage state instead of remaining on Loading indefinitely. Added a five-second timeout and disabled query retries.
+- [ ] Fix the homepage registration CTA so clicking it reaches the public registration route and form instead of remaining on the homepage fallback.
+- [ ] Diagnose and improve the Manus project preview Loading state, or clearly separate preview-only issues from the public Vercel visitor flow.
