@@ -271,5 +271,5 @@
 - [x] Complete the five-page notes backlog from the attached project report. See FIVE_PAGE_NOTES_COMPLETION_AR.md with page-by-page implementation, verification, and deferred-scope notes.
 - [x] Add the approved analytics suggestions: time filtering, analytics PDF export, and GI/No-Gi comparison. Added time-window filtering, client-side PDF export, mode comparison charts, and pure-function tests.
 - [x] Verify the real Vercel URL, run tests/build, and publish only after a successful deployment. Local build, Vercel handler import, and 58 Vitest tests pass; the latest Vercel deployment still requires final live-domain smoke verification.
-- [ ] Diagnose and restore the reported Vercel access failure, then verify the primary URL in a fresh browser session.
+- [x] Diagnose and restore the reported Vercel access failure, then verify the primary URL in a fresh browser session. Production f9239a7 serves the correct HTML and JavaScript assets; API, registration, and rules smoke checks pass.
 - [x] Restore the reported Vercel access failure. Production f9239a7 now serves HTML at the primary domain, hashed JavaScript with the correct MIME type, `/api/trpc/auth.me` returns 204, and `/register/demo` plus `/register/demo/rules` return 200.
