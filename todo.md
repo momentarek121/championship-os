@@ -262,3 +262,7 @@
 - [x] Add drag-and-drop match scheduling between mats/queues with persisted schedule updates. Staff can drag queued matches onto mat cards and persist assignments through the guarded mutation.
 - [x] Add visual drag-and-drop bracket slot editing with server validation and audit logging. Staff can drag athletes into Slot A/Slot B; the existing server validator and audit path remain authoritative.
 - [x] Re-audit the attached report, test responsive staff workflows, and publish the verified release. TypeScript, 53 Vitest tests, production build, and the corrected scope matrix passed; responsive shell guards are in place.
+
+- [x] Add a responsive tournament analytics dashboard with registration totals, weight-category counts, belt counts, and operational KPIs. Added it to the organizer Overview using real dashboard data and responsive Recharts visuals.
+- [x] Add pure analytics calculations and tests based on real dashboard data without fabricated metrics. Added shared/analytics.ts and server/analytics.test.ts.
+- [x] Verify desktop/mobile rendering, build, and publish the analytics dashboard. TypeScript, 55 Vitest tests, and Production Build passed; responsive cards and charts use mobile-safe containers.
