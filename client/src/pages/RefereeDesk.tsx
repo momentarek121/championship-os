@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { useSupabaseRealtime } from "@/hooks/useSupabaseRealtime";
 
 export default function RefereeDesk() {
   const dashboard = trpc.tournament.dashboard.useQuery(undefined, { retry: false, refetchInterval: 3000 });
@@ -28,6 +29,8 @@ export default function RefereeDesk() {
   const [displayMode, setDisplayMode] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const matches = (dashboard.data?.matches ?? []).filter((match: any) => match.status !== "finished");
+  const activeTournamentId = dashboard.data?.tournaments?.[0]?.id;
+  useSupabaseRealtime(activeTournamentId, dashboard.refetch);
   const selected = useMemo(() => matches.find((match: any) => match.id === selectedId) ?? matches[0], [matches, selectedId]);
   const athleteName = (id: number | null) => (dashboard.data?.athletes ?? []).find((athlete: any) => athlete.id === id)?.fullName ?? "Awaiting athlete";
   const winnerId = selected ? ((Number(scoreA) + Number(advantageA) - Number(penaltyA)) >= (Number(scoreB) + Number(advantageB) - Number(penaltyB)) ? selected.athleteAId : selected.athleteBId) : null;

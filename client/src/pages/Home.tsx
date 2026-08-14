@@ -18,6 +18,7 @@ import { selectMedalResults } from "@shared/results";
 import { setupChecklistReady } from "@shared/tournamentSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { filterMatches } from "@shared/matchFilters";
+import { useSupabaseRealtime } from "@/hooks/useSupabaseRealtime";
 
 type Section = "Overview" | "Athletes" | "Registrations" | "Weigh-in" | "Brackets" | "Scoring" | "Results";
 
@@ -86,6 +87,7 @@ export default function Home() {
   const weighInQueue = useMemo(() => selectWeighInQueue(visibleRegistrations), [visibleRegistrations]);
   const setupReady = Boolean(active && setupChecklistReady({ organizationName: active.organizationName, weighInMode: active.weighInMode, weighInTolerance: String(active.weighInTolerance ?? "0.00"), scaleNotes: active.scaleNotes ?? "" }));
   const medalResults = useMemo(() => selectMedalResults(matches), [matches]);
+  useSupabaseRealtime(active?.id, dashboard.refetch);
   const matchStatusLabel = (status: string) => language === "ar" ? ({ live: "جارية", finished: "مكتملة", queued: "قائمة", no_show: "غياب" }[status] ?? status) : ({ live: "Live", finished: "Completed", queued: "Queued", no_show: "No-show" }[status] ?? status);
   const matchStatusClass = (status: string) => status === "live" ? "bg-amber-100 text-amber-800 animate-pulse" : status === "finished" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700";
 
