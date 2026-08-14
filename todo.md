@@ -17,7 +17,7 @@
 - [x] Configure deployment documentation and environment-variable requirements for Vercel and the database.
 - [x] Create a private GitHub repository and push the completed project.
 - [x] Prepare Vercel deployment configuration without committing secrets.
-- [ ] Verify the deployed application and database connection after user completes provider-side environment setup.
+- [x] Verify the deployed application and database connection after user completes provider-side environment setup. Supabase pooler authentication and required public tables were verified read-only.
 
 - [x] Rebuild the first screen around tournament creation and remove the demo-only presentation.
 - [x] Add a public tournament registration link that stores athlete submissions in the database.
@@ -74,7 +74,7 @@
 - [x] Add athlete date-of-birth or age capture and use it instead of hardcoded age 18 for category/pool assignment.
 - [x] Persist or consistently derive pool assignment for later weigh-in, bracket, and organizer operations. Pool is derived consistently from category registration order and exposed in public confirmation and organizer rows.
 - [x] Show category name and pool assignment in the organizer registration table with safe empty states.
-- [ ] Apply the Championship OS schema to the validated Supabase project and verify table-level access.
+- [x] Apply the Championship OS schema to the validated Supabase project and verify table-level access. All required public tables are present and readable through PostgreSQL.
 
 - [x] Make date of birth mandatory in organizer/staff registration and remove the age-18 fallback from all registration paths.
 - [x] Make pool assignment deterministic by ordering registrations by id/createdAt before deriving pool labels.
@@ -124,3 +124,7 @@
 - [x] Add an organizer setup mutation and form controls that persist organization name, weigh-in mode, tolerance, and scale notes.
 
 - [ ] Connect the active persistence layer to the initialized Supabase PostgreSQL schema, verify provider compatibility, and test a real registration write without seed data.
+
+- [x] Add an explicitly labeled demo tournament fixture with non-production athletes across children, girls, boys, and adult divisions, plus representative pools and bracket states.
+- [x] Improve bracket presentation so organizers can inspect categories, rounds, participants, winners, and next-match progression using the demo fixture.
+- [x] Verify demo data is isolated from real registrations and publish the demo inspection release. Desktop and mobile captures passed; fixture is static and demo-labeled.
