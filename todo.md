@@ -332,3 +332,7 @@
 - [x] Diagnose why `egyptbjj.vercel.app` still shows the old infinite loading screen after the Home loading-gate fix. The Vercel project was still serving the previous production deployment until GitHub main received commit `2d86859`.
 - [x] Verify the live Vercel deployment commit, bundle marker, dashboard API, and mobile-safe fallback. The new bundle contains the independent-auth loading marker and Retry error state; `/api/trpc/tournament.dashboard` returns HTTP 200.
 - [x] Republish and confirm the primary Vercel domain serves the fixed Home bundle and a non-infinite loading state. Production deployment `2d86859` is Ready, serves `egyptbjj.vercel.app`, and the deployed bundle contains the fix.
+
+- [x] Diagnose why `egyptbjj.vercel.app` is not found from the user's iPhone even though Vercel previously showed the domain attached. Vercel DNS resolves from the deployment environment and the domain returns HTTP 200; the screenshot indicates a transient iPhone/carrier DNS cache issue.
+- [x] Verify Vercel production URL, deployment URL, DNS resolution, TLS, and domain attachment status. Both `egyptbjj.vercel.app` and the current deployment URL return HTTPS 200 with `server: Vercel`.
+- [x] Repair the domain binding or provide a tested replacement URL, then document the exact mobile link to use. The domain remains attached and the tested fallback is `https://egyptbjj-o68zfedip-momentarek121s-projects.vercel.app`.
