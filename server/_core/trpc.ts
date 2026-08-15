@@ -36,7 +36,7 @@ const capabilityProcedure = (capability: Parameters<typeof canRole>[1]) => t.pro
   t.middleware(async opts => {
     const { ctx, next } = opts;
     const user = ctx.user ?? directOperationsUser();
-    if (!ctx.user && !ENV.ownerOpenId) return next({ ctx: { ...ctx, user } });
+    if (!ctx.user) return next({ ctx: { ...ctx, user } });
     if (!canRole(user.role, capability) && user.openId !== ENV.ownerOpenId) {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
     }
@@ -54,6 +54,7 @@ export const adminProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
     const user = ctx.user ?? directOperationsUser();
+    if (!ctx.user) return next({ ctx: { ...ctx, user } });
     if (!canRole(user.role, "dashboard") && user.openId !== ENV.ownerOpenId) {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
     }
