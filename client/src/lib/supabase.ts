@@ -9,7 +9,9 @@ export const supabase = url && anonKey
 
 export async function signInWithGoogle() {
   if (!supabase) throw new Error("Supabase Auth is not configured");
-  return supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
+  const result = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin, skipBrowserRedirect: true } });
+  if (!result.error && result.data?.url) window.location.assign(result.data.url);
+  return result;
 }
 
 export async function sendEmailMagicLink(email: string) {
