@@ -16,6 +16,10 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+async function safeRows<T>(label: string, query: () => Promise<T[]>): Promise<T[]> {
+  try { return await query(); } catch (error) { console.warn(`[Database] ${label} unavailable; continuing with an empty view`, error); return []; }
+}
+
 // Lazily create the Drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   const rawDatabaseUrl = process.env.SUPABASE_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -118,13 +122,13 @@ export async function getTournamentDashboard() {
   const db = await getDb();
   if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], mats: [], standings: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
   const [tournamentRows, athleteRows, registrationRows, matchRows, categoryRows, matRows, clubRows] = await Promise.all([
-    db.select().from(tournaments).orderBy(desc(tournaments.id)),
-    db.select().from(athletes),
-    db.select().from(registrations).orderBy(asc(registrations.id)),
-    db.select().from(matches),
-    db.select().from(categories).orderBy(asc(categories.id)),
-    db.select().from(mats).orderBy(asc(mats.id)),
-    db.select().from(clubs).orderBy(asc(clubs.id)),
+    safeRows("tournaments", () => db.select().from(tournaments).orderBy(desc(tournaments.id))),
+    safeRows("athletes", () => db.select().from(athletes)),
+    safeRows("registrations", () => db.select().from(registrations).orderBy(asc(registrations.id))),
+    safeRows("matches", () => db.select().from(matches)),
+    safeRows("categories", () => db.select().from(categories).orderBy(asc(categories.id))),
+    safeRows("mats", () => db.select().from(mats).orderBy(asc(mats.id))),
+    safeRows("clubs", () => db.select().from(clubs).orderBy(asc(clubs.id))),
   ]);
   const categoryPositions = new Map<number, number>();
   const clubNames = new Map(clubRows.map(club => [club.id, club.name]));
@@ -273,9 +277,9 @@ export async function getPublicParticipants(slug: string) {
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) return undefined;
   const [categoryRows, registrationRows, athleteRows] = await Promise.all([
-    db.select().from(categories).where(eq(categories.tournamentId, tournament.id)).orderBy(asc(categories.id)),
-    db.select().from(registrations).where(eq(registrations.tournamentId, tournament.id)).orderBy(asc(registrations.id)),
-    db.select().from(athletes).orderBy(asc(athletes.id)),
+    safeRows("public categories", () => db.select().from(categories).where(eq(categories.tournamentId, tournament.id)).orderBy(asc(categories.id))),
+    safeRows("public registrations", () => db.select().from(registrations).where(eq(registrations.tournamentId, tournament.id)).orderBy(asc(registrations.id))),
+    safeRows("public athletes", () => db.select().from(athletes).orderBy(asc(athletes.id))),
   ]);
   const athleteById = new Map(athleteRows.map(athlete => [athlete.id, athlete]));
   const grouped = categoryRows.map(category => {
