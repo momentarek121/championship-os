@@ -12,7 +12,7 @@ const tools = [
   { href: "/mats", icon: Scale, en: "Mats and pools", ar: "المطّات والبولات", detailEn: "Ordered queues and drag-and-drop assignment", detailAr: "قوائم مرتبة وتوزيع بالسحب والإفلات" },
   { href: "/referee", icon: Gavel, en: "Referee desk", ar: "واجهة الحكم", detailEn: "Timer, points, penalties, and winner advancement", detailAr: "التايمر والنقاط والعقوبات وترقية الفائز" },
   { href: "/staff", icon: Users, en: "Staff operations", ar: "تشغيل الموظفين", detailEn: "Registration, weigh-in, mat, and bracket handoff", detailAr: "التسجيل والميزان والمطّات وتسليم البراكت" },
-  { href: "/register/portsaid-bjj-championship", icon: ClipboardList, en: "Athlete registration", ar: "تسجيل اللاعبين", detailEn: "Public link; no organizer sign-in required", detailAr: "رابط عام بدون تسجيل دخول للمنظم" },
+  { href: "/", icon: ClipboardList, en: "Import athlete roster", ar: "استيراد قائمة اللاعبين", detailEn: "Excel, PDF, or CSV upload with automatic placement", detailAr: "رفع Excel أو PDF أو CSV مع تسكين تلقائي" },
   { href: "/rankings", icon: Trophy, en: "Rankings and results", ar: "الترتيب والنتائج", detailEn: "Public standings and published outcomes", detailAr: "الترتيب العام والنتائج المنشورة" },
 ];
 

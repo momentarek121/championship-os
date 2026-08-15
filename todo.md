@@ -347,4 +347,8 @@
 
 - [x] Diagnose the user's inability to reach the deployed website despite HTTP 200 from the sandbox. All public links return HTTP 200 from an independent network check; the remaining failure is device/carrier DNS or a mistyped/old deployment URL.
 - [x] Test the primary Vercel domain, current Vercel deployment URL, managed preview URL, and public registration URL from independent requests. Primary, both deployment URLs, managed domain, and Port Said registration return HTTP 200.
-- [x] Provide one verified public URL with exact mobile instructions, or repair the domain if the primary URL fails externally. Use `https://egyptbjj.vercel.app/`; direct registration is `https://egyptbjj.vercel.app/register/portsaid-bjj-championship`.
+- [x] Provide one verified public URL with exact mobile instructions, or repair the domain if the primary URL fails externally. The primary site was verified; the public registration URL was later retired in favor of internal roster import.
+
+- [x] Remove public athlete registration links and CTAs from the homepage, operations hub, and organizer navigation. App no longer registers public `/register/:slug` routes; operations now points to the internal roster import workspace.
+- [x] Make Excel/PDF/CSV athlete import the primary organizer intake flow with clear Arabic/English instructions and automatic placement. The operations hub card now describes file upload and automatic placement in both languages.
+- [x] Add regression checks that no public registration CTA remains in operating surfaces, then test and publish the change. App/Home/OperationsHub regression checks pass; TypeScript, 79 tests, and Production build pass.
