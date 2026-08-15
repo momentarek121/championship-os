@@ -16,13 +16,15 @@ import BracketWorkspace from "@/pages/BracketWorkspace";
 import MatWorkspace from "@/pages/MatWorkspace";
 import DemoReferee from "@/pages/DemoReferee";
 import OperationsHub from "@/pages/OperationsHub";
+import ImportCenter from "@/pages/ImportCenter";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"} component={ImportCenter} />
       <Route path={"/operations"} component={OperationsHub} />
+      <Route path={"/import"} component={ImportCenter} />
       <Route path={"/athlete/:slug"} component={AthletePortal} />
       <Route path={"/event/:slug/participants"} component={PublicParticipants} />
       <Route path={"/demo/brackets"} component={DemoBrackets} />

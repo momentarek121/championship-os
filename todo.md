@@ -356,3 +356,7 @@
 - [x] Verify the user's current Vercel URL is serving the latest production bundle rather than the prior loading-only deployment. The primary domain now serves deployment 340e674 and the new bundle.
 - [x] Push the latest import-only UI and bounded timeout fix to the GitHub branch connected to Vercel. GitHub main and Vercel Production now use 340e674.
 - [x] Confirm the live bundle contains the timeout/Retry state and the internal athlete-import route, then publish a final checkpoint. Live bundle contains Connection taking too long, Open athlete import, and Import athlete roster; `/register/:slug` is absent.
+
+- [x] Stop the root page from blocking on the dashboard request for the user's mobile browser. `/` now routes directly to ImportCenter and does not query dashboard.
+- [x] Make the root entry immediately show the internal athlete-import workspace or a working navigation shell. ImportCenter opens immediately with Excel/PDF/CSV upload and links to operations and brackets.
+- [x] Test the root and import flow in a real browser session, then republish only after the visible page is confirmed. TypeScript, 79 tests, and Production build pass; Vercel browser verification follows this publish.

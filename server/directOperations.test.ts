@@ -24,10 +24,12 @@ const trpc = fs.readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8"
   });
 
   it("exposes the public operations hub and direct capability middleware", () => {
+    expect(app).toContain('path={"/"} component={ImportCenter}');
     expect(app).toContain("path={\"/operations\"}");
     expect(app).not.toContain("/register/:slug");
     expect(operations).toContain("Import athlete roster");
     expect(operations).toContain("استيراد قائمة اللاعبين");
+    expect(operations).toContain('href: "/import"');
     expect(trpc).toContain("directOperationsUser");
   });
 
