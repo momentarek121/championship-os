@@ -4,6 +4,7 @@ import fs from "node:fs";
 const home = fs.readFileSync(new URL("../client/src/pages/Home.tsx", import.meta.url), "utf8");
 const app = fs.readFileSync(new URL("../client/src/App.tsx", import.meta.url), "utf8");
 const operations = fs.readFileSync(new URL("../client/src/pages/OperationsHub.tsx", import.meta.url), "utf8");
+const importer = fs.readFileSync(new URL("../client/src/components/AthleteImportPanel.tsx", import.meta.url), "utf8");
 const trpc = fs.readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8");
 
  describe("direct tournament operations mode", () => {
@@ -30,6 +31,9 @@ const trpc = fs.readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8"
     expect(operations).toContain("Import athlete roster");
     expect(operations).toContain("استيراد قائمة اللاعبين");
     expect(operations).toContain('href: "/import"');
+    expect(importer).toContain('pdfjs-dist/legacy/build/pdf.mjs');
+    expect(importer).toContain('accept=".xlsx,.xls,.csv,.pdf,application/pdf"');
+    expect(importer).toContain('readPdf');
     expect(trpc).toContain("directOperationsUser");
   });
 

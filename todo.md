@@ -360,3 +360,7 @@
 - [x] Stop the root page from blocking on the dashboard request for the user's mobile browser. `/` now routes directly to ImportCenter and does not query dashboard.
 - [x] Make the root entry immediately show the internal athlete-import workspace or a working navigation shell. ImportCenter opens immediately with Excel/PDF/CSV upload and links to operations and brackets.
 - [x] Test the root and import flow in a real browser session, then republish only after the visible page is confirmed. Deployment 9504e7d is Ready; its URL and `egyptbjj.vercel.app` serve the Import Center bundle with no `/register/:slug`.
+
+- [x] Add PDF upload to the root Import Center alongside Excel/XLSX/CSV. The file picker now accepts PDF and the UI labels it alongside spreadsheet formats.
+- [x] Extract supported PDF text rows into the same normalized athlete preview and automatic category/pool placement flow. Text-based PDF rows are grouped by line, normalized through the same athlete schema, previewed, and classified automatically.
+- [x] Add PDF import regression coverage, update labels/help text, rebuild, and publish. Regression checks cover pdfjs, file acceptance, and readPdf; TypeScript, 79 tests, and Production build pass.
