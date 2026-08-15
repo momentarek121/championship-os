@@ -17,12 +17,14 @@ import StaffDashboard from "@/pages/StaffDashboard";
 import BracketWorkspace from "@/pages/BracketWorkspace";
 import MatWorkspace from "@/pages/MatWorkspace";
 import DemoReferee from "@/pages/DemoReferee";
+import OperationsHub from "@/pages/OperationsHub";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/operations"} component={OperationsHub} />
       <Route path={"/register/:slug/rules"} component={RegistrationRules} />
       <Route path={"/register/:slug"} component={PublicRegistration} />
       <Route path={"/athlete/:slug"} component={AthletePortal} />

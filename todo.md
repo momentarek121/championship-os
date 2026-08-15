@@ -301,3 +301,9 @@
 - [x] Add organizer registration-list export to Excel and PDF, respecting active filters and Arabic labels.
 - [x] Add Vitest coverage for registration filtering and export row normalization.
 - [x] Verify export downloads and filtered organizer UI on desktop and mobile, then publish the release. TypeScript, 70 Vitest tests, Production build, server restart, and desktop preview passed; browser download clicks require an authenticated organizer session.
+
+- [x] Remove the mandatory organizer login wall from the main operating workspace while preserving optional auth code for later use. The home dashboard now loads without an auth gate; direct capability middleware supplies the operating context when no session exists.
+- [x] Add a direct public operations hub linking organizer, brackets, matches, mats, referee, athlete portal, registration, and rules. Added `/operations` with role-oriented cards and bilingual labels.
+- [x] Audit every visible route and primary button for a working destination or action. Primary routes return HTTP 200; dedicated bracket, mat, staff, referee, match, registration, and public information actions have explicit destinations.
+- [x] Add automated coverage for direct operation access and route/button smoke expectations. `server/directOperations.test.ts` covers the auth gate removal, hub route, direct middleware, and primary route registration.
+- [x] Run full typecheck, tests, production build, live route/API smoke tests, and publish the direct-operation release. Local direct dashboard API returned HTTP 200 without auth; live verification and checkpoint publication are completed in this release.
