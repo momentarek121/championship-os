@@ -6,7 +6,6 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, bracketProcedure, publicProcedure, refereeProcedure, registrationProcedure, router, staffProcedure, weighInProcedure } from "./_core/trpc";
 import { canUpdateRegistrationFields } from "@shared/registrationPermissions";
-import { importedAthleteRowsSchema } from "@shared/athleteImport";
 import { createAthleteRegistration, bulkCreateAthleteRegistrations, updateAthleteProfile, createManualMatch, createPublicRegistration, createTournament, finishMatch, generateAutomaticBrackets, getAthletePortal, getClubs, getPublicParticipants, getTournamentBySlug, getTournamentDashboard, seedDemoTournament, reassignMatchMat, updateMatchSlots, updateMatchStatus, updateRegistrationStatus, updateTournamentSettings, updateTournamentWeighIn, updateUserRole } from "./db";
 
 const tournamentInput = z.object({
@@ -75,10 +74,7 @@ export const appRouter = router({
       registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
       sport: "Brazilian Jiu-Jitsu",
     })),
-    bulkRegisterAthletes: registrationProcedure.input(z.object({
-      tournamentId: z.number(),
-      athletes: importedAthleteRowsSchema,
-    })).mutation(({ input }) => bulkCreateAthleteRegistrations({ tournamentId: input.tournamentId, athletes: input.athletes.map(athlete => ({ ...athlete, dateOfBirth: new Date(`${athlete.dateOfBirth}T00:00:00Z`), expectedWeight: athlete.expectedWeight.toFixed(2) })) })),
+    bulkRegisterAthletes: registrationProcedure.input(z.object({ tournamentId: z.number(), rows: z.array(z.object({ fullName: z.string().min(2), email: z.string().email().optional().or(z.literal("")), phone: z.string().optional(), dateOfBirth: z.string().min(1), gender: z.enum(["male", "female"]), belt: z.string().min(1), expectedWeight: z.number().positive().max(500) })).min(1).max(500), sport: z.string().optional() })).mutation(({ input }) => bulkCreateAthleteRegistrations(input)),
     updateWeighIn: weighInProcedure.input(z.object({ tournamentId: z.number(), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/) })).mutation(({ input, ctx }) => updateTournamentWeighIn(input.tournamentId, input.weighInMode, input.weighInTolerance, ctx.user.id)),
     updateSettings: adminProcedure.input(z.object({ tournamentId: z.number(), organizationName: z.string().min(2), weighInMode: z.enum(["ibjjf", "custom"]), weighInTolerance: z.string().regex(/^\\d+(\\.\\d{1,2})?$/), competitionMode: z.enum(["gi", "nogi", "both"]).default("gi"), scaleNotes: z.string().max(1000).default(""), beltPolicy: z.array(z.string().min(1)).max(12).default([]) })).mutation(({ input, ctx }) => updateTournamentSettings({ ...input, actorUserId: ctx.user.id })),
     generateBrackets: bracketProcedure.input(z.object({ tournamentId: z.number() })).mutation(({ input, ctx }) => generateAutomaticBrackets(input.tournamentId, ctx.user.id)),

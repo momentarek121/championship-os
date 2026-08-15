@@ -495,13 +495,15 @@ export async function updateMatchSlots(input: { matchId: number; athleteAId: num
   return { success: true } as const;
 }
 
-export async function bulkCreateAthleteRegistrations(input: { tournamentId: number; athletes: Array<{ fullName: string; email?: string | null; phone?: string | null; dateOfBirth: Date; gender: "male" | "female"; belt: string; expectedWeight: string; clubId?: number | null }> }) {
+
+export async function bulkCreateAthleteRegistrations(input: { tournamentId: number; rows: Array<{ fullName: string; email?: string; phone?: string; dateOfBirth: string; gender: "male" | "female"; belt: string; expectedWeight: number }>; sport?: string }) {
+  if (input.rows.length > 500) throw new Error("A maximum of 500 athletes can be imported at once");
   const results: Array<{ athleteId: number; categoryId: number }> = [];
-  for (const athlete of input.athletes) {
+  for (const row of input.rows) {
     results.push(await createAthleteRegistration({
-      athlete: { ...athlete, email: athlete.email || null, phone: athlete.phone || null, clubId: athlete.clubId ?? null },
+      athlete: { fullName: row.fullName, email: row.email || null, phone: row.phone || null, dateOfBirth: new Date(`${row.dateOfBirth}T00:00:00Z`), gender: row.gender, belt: row.belt, expectedWeight: row.expectedWeight.toFixed(2), clubId: null },
       registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
-      sport: "Brazilian Jiu-Jitsu",
+      sport: input.sport ?? "Brazilian Jiu-Jitsu",
     }));
   }
   return { imported: results.length, results };
