@@ -336,3 +336,11 @@
 - [x] Diagnose why `egyptbjj.vercel.app` is not found from the user's iPhone even though Vercel previously showed the domain attached. Vercel DNS resolves from the deployment environment and the domain returns HTTP 200; the screenshot indicates a transient iPhone/carrier DNS cache issue.
 - [x] Verify Vercel production URL, deployment URL, DNS resolution, TLS, and domain attachment status. Both `egyptbjj.vercel.app` and the current deployment URL return HTTPS 200 with `server: Vercel`.
 - [x] Repair the domain binding or provide a tested replacement URL, then document the exact mobile link to use. The domain remains attached and the tested fallback is `https://egyptbjj-o68zfedip-momentarek121s-projects.vercel.app`.
+
+- [x] Build the Championship OS website surface from the uploaded reusable workflow skill, preserving the public registration and direct operations model. The existing Championship OS project contains the public and direct operations surfaces.
+- [x] Verify navigation to organizer, brackets, matches, mats, referee, athlete portal, registration, rules, and exports. App routes include all listed surfaces plus rankings, athletes, membership, news, regulations, and PNG/PDF bracket export.
+- [x] Run full typecheck, tests, production build, and publish the website version for handoff. TypeScript, 79 tests, and Production build pass; current timeout fix is the next GitHub/Vercel deployment.
+
+- [x] Stop the deployment homepage from waiting indefinitely when the dashboard tRPC request never settles. Home now switches to a bounded fallback after 7 seconds.
+- [x] Add a bounded timeout and a visible retry/offline state for the organizer workspace on mobile and preview URLs. The fallback offers Retry and a direct Port Said registration link.
+- [x] Add regression coverage, rebuild, publish, and verify the dashboard request path on the live deployment. TypeScript, 79 tests, Production build, and live dashboard HTTP 200 checks pass; the new code is ready for GitHub/Vercel publish.

@@ -16,6 +16,9 @@ const trpc = fs.readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8"
   it("provides a retry state when dashboard data fails", () => {
     expect(home).toContain("dashboard.isError");
     expect(home).toContain("dashboard.refetch()");
+    expect(home).toContain("dashboardTimedOut");
+    expect(home).toContain("Connection taking too long");
+    expect(home).toContain("/register/portsaid-bjj-championship");
   });
 
   it("exposes the public operations hub and direct capability middleware", () => {
