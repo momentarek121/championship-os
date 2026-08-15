@@ -119,6 +119,7 @@ export async function getUserByOpenId(openId: string) {
 }
 
 export async function getTournamentDashboard() {
+  try {
   const db = await getDb();
   if (!db) return { tournaments: [], athletes: [], registrations: [], matches: [], mats: [], standings: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
   const [tournamentRows, athleteRows, registrationRows, matchRows, categoryRows, matRows, clubRows] = await Promise.all([
@@ -164,6 +165,10 @@ export async function getTournamentDashboard() {
       liveMatches: matchRows.filter(row => row.status === "live").length,
     },
   };
+  } catch (error) {
+    console.warn("[Database] dashboard unavailable; returning empty operations view", error);
+    return { tournaments: [], athletes: [], registrations: [], matches: [], mats: [], clubs: [], standings: [], metrics: { registered: 0, paid: 0, checkedIn: 0, liveMatches: 0 } };
+  }
 }
 
 export async function createTournament(input: typeof tournaments.$inferInsert & { matCount?: number }) {
