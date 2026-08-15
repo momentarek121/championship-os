@@ -324,3 +324,7 @@
 - [x] Make exports respect the selected GI/No-Gi mode and round filters with readable Arabic/English labels. Export receives the current mode and round-filtered match set and uses safe filenames and labels.
 - [x] Create a reusable Championship OS workflow skill using skill-creator, with concise implementation and QA guidance. Created `/home/ubuntu/skills/championship-os-workflow/SKILL.md`.
 - [x] Validate the skill package and add tests for bracket export data/controls, then publish the release. Skill validator passes; TypeScript, 78 Vitest tests, and Production build pass.
+
+- [x] Fix the mobile organizer workspace staying on "Loading tournament workspace…" instead of showing data or a retry state. Home no longer waits for optional Auth loading when dashboard data is ready.
+- [x] Verify dashboard API response, query timeout behavior, and mobile route rendering without login. Direct public routes/API were checked; the loading gate is now dashboard-data based and the error state has Retry.
+- [x] Add regression coverage for bounded loading/error fallback and publish the fix. `server/directOperations.test.ts` now covers the loading gate and retry state; TypeScript, 79 tests, and Production build pass.

@@ -9,6 +9,13 @@ const trpc = fs.readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8"
   it("loads the organizer dashboard without an auth-enabled query gate", () => {
     expect(home).toContain("useQuery(undefined, { enabled: true");
     expect(home).not.toContain("if (!isAuthenticated) return");
+    expect(home).toContain("dashboard.isLoading && !dashboard.data");
+    expect(home).not.toContain("loading && dashboard.isLoading");
+  });
+
+  it("provides a retry state when dashboard data fails", () => {
+    expect(home).toContain("dashboard.isError");
+    expect(home).toContain("dashboard.refetch()");
   });
 
   it("exposes the public operations hub and direct capability middleware", () => {
