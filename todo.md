@@ -294,3 +294,13 @@
 - [x] Repair the Vercel API handler/rewrite so public tRPC requests return a real JSON response instead of HTTP 200 with an empty body. Vercel Production now returns HTTP 200 JSON for the Port Said lookup after the explicit handler and rewrite repair.
 - [x] Create or restore the real Port Said production tournament row in the active Supabase database; created Supabase tournament id 7 with exact slug `portsaid-bjj-championship` and four configured mats, then verified live lookup returns the real event.
 - [x] Repair the reported public Port Said registration link that does not respond when opened or clicked, then verify the live form in a fresh browser session. Primary `https://egyptbjj.vercel.app/register/portsaid-bjj-championship` now serves the bilingual fallback form in HTML, and its API returns the real Port Said event with HTTP 200; the fallback can submit directly if React boot is delayed.
+- [ ] Enable and save the existing Google OAuth provider in Supabase; current production error is `Unsupported provider: provider is not enabled`.
+- [ ] Complete a dedicated bracket workspace with GI/No-Gi separation, rounds, pools, and manual athlete placement.
+- [ ] Complete a dedicated match workspace with full-screen timer, score controls, winner advancement, and referee-friendly states.
+- [ ] Complete a dedicated mats/pools workspace showing every mat, its active bout, queue, and ordered pool schedule.
+- [ ] Add validated PDF and Excel athlete import with preview, field mapping, duplicate detection, and bracket-ready records.
+- [ ] Refactor and verify the operations code with tests and responsive UI checks, then push the clean release to GitHub and Vercel.
+- [ ] Audit and map all five PDF-note requirements against the current routes, components, server procedures, and database schema.
+- [ ] Complete the UI/UX review and activate unfinished bracket, match, mat/pool, athlete, and public-facing code paths without Google login.
+- [ ] Add or finish automatic athlete data upload/import workflows and bracket-ready validation for PDF/Excel records.
+- [ ] Verify the final GitHub, Vercel, and Supabase release state and produce a comprehensive finished-versus-pending report.

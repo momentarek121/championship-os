@@ -494,3 +494,15 @@ export async function updateMatchSlots(input: { matchId: number; athleteAId: num
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "edit_slots", beforeValue: { athleteAId: existing[0].athleteAId, athleteBId: existing[0].athleteBId }, afterValue: { athleteAId: input.athleteAId, athleteBId: input.athleteBId } });
   return { success: true } as const;
 }
+
+export async function bulkCreateAthleteRegistrations(input: { tournamentId: number; athletes: Array<{ fullName: string; email?: string | null; phone?: string | null; dateOfBirth: Date; gender: "male" | "female"; belt: string; expectedWeight: string; clubId?: number | null }> }) {
+  const results: Array<{ athleteId: number; categoryId: number }> = [];
+  for (const athlete of input.athletes) {
+    results.push(await createAthleteRegistration({
+      athlete: { ...athlete, email: athlete.email || null, phone: athlete.phone || null, clubId: athlete.clubId ?? null },
+      registration: { tournamentId: input.tournamentId, status: "pending", paymentStatus: "unpaid", checkInStatus: "not_checked_in", weighInStatus: "pending" },
+      sport: "Brazilian Jiu-Jitsu",
+    }));
+  }
+  return { imported: results.length, results };
+}
