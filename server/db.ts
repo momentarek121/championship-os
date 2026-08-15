@@ -1,8 +1,9 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 import { calculateAge, expandCompetitionModes, poolLabel, resolveCategory } from "../shared/category";
 import { selectBracketEligible } from "../shared/operationFlow";
-import { buildBracketPairs, nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
-import { roundLabel } from "../shared/rounds";
+import { nextBracketSlot, nextRoundMatchCount } from "../shared/bracket";
+import { nextRoundLabel } from "../shared/rounds";
+import { buildAutomaticBracketPlan, bracketRoundLabel } from "../shared/automaticBrackets";
 import { buildMatSchedule } from "../shared/scheduler";
 import { calculateAcademyStandings } from "../shared/standings";
 import { selectMedalResults } from "../shared/results";
@@ -358,28 +359,32 @@ export async function updateMatchStatus(matchId: number, status: "queued" | "cal
 export async function generateAutomaticBrackets(tournamentId: number, actorUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
+  const existingMatches = await db.select({ id: matches.id }).from(matches).where(eq(matches.tournamentId, tournamentId));
+  if (existingMatches.length > 0) return { success: true, created: 0, alreadyGenerated: true, groups: [], skipped: ["Matches already exist for this tournament"] } as const;
+
   const rows = await db.select().from(registrations).where(eq(registrations.tournamentId, tournamentId));
   const eligibleRows = selectBracketEligible(rows as Array<typeof rows[number] & { status: "pending" | "approved" | "rejected"; weighInStatus: "pending" | "passed" | "overweight" }>);
-  const pairs = buildBracketPairs(eligibleRows);
+  const plan = buildAutomaticBracketPlan(eligibleRows);
+  const skipped = eligibleRows.filter(row => row.categoryId == null).map(row => `Registration ${row.id} has no category`);
+  const groups = plan.map(group => ({ categoryId: group.categoryId, athleteCount: group.athleteCount, byes: group.byes, firstRoundMatches: group.firstRoundMatchCount }));
   let created = 0;
-  const pairsByCategory = new Map<number, typeof pairs>();
-  for (const pair of pairs) pairsByCategory.set(pair.categoryId, [...(pairsByCategory.get(pair.categoryId) ?? []), pair]);
-  for (const [categoryId, categoryPairs] of Array.from(pairsByCategory.entries())) {
-    const firstRoundMatches = categoryPairs.length;
-    for (let index = 0; index < categoryPairs.length; index += 1) {
-      const pair = categoryPairs[index];
-      await db.insert(matches).values({ tournamentId, categoryId, round: roundLabel(firstRoundMatches), matchNumber: index + 1, athleteAId: pair.athleteAId, athleteBId: pair.athleteBId, status: "queued", durationMinutes: 6, delayMinutes: 0 });
+  for (const group of plan) {
+    const firstRound = bracketRoundLabel(group.firstRoundMatchCount);
+    for (const planned of group.matches) {
+      await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, round: firstRound, matchNumber: planned.matchNumber, athleteAId: planned.athleteAId, athleteBId: planned.athleteBId, status: "queued", durationMinutes: 6, delayMinutes: 0 });
       created += 1;
     }
-    let currentRoundMatches = firstRoundMatches;
+    let currentRoundMatches = group.firstRoundMatchCount;
+    let currentRound = firstRound;
     while (currentRoundMatches > 1) {
       const nextRoundMatches = nextRoundMatchCount(currentRoundMatches);
-      const nextRound = nextRoundMatches === 1 ? "Final" : roundLabel(nextRoundMatches * 2);
+      const nextRound = nextRoundLabel(currentRound) ?? "Final";
       for (let matchNumber = 1; matchNumber <= nextRoundMatches; matchNumber += 1) {
-        await db.insert(matches).values({ tournamentId, categoryId, round: nextRound, matchNumber, athleteAId: null, athleteBId: null, status: "queued", durationMinutes: 6, delayMinutes: 0 });
+        await db.insert(matches).values({ tournamentId, categoryId: group.categoryId, round: nextRound, matchNumber, athleteAId: null, athleteBId: null, status: "queued", durationMinutes: 6, delayMinutes: 0 });
         created += 1;
       }
       currentRoundMatches = nextRoundMatches;
+      currentRound = nextRound;
     }
   }
   const availableMats = await db.select().from(mats).where(eq(mats.tournamentId, tournamentId));
@@ -391,8 +396,8 @@ export async function generateAutomaticBrackets(tournamentId: number, actorUserI
       await db.update(matches).set({ matId: availableMats[scheduledMatch.matIndex - 1]?.id ?? null, scheduledAt: scheduledMatch.scheduledAt, durationMinutes: scheduledMatch.durationMinutes, delayMinutes: scheduledMatch.delayMinutes, schedulerOrder: scheduledMatch.schedulerOrder }).where(eq(matches.id, scheduledMatch.id));
     }
   }
-  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: { created, firstRoundMatches: pairs.length, scheduled: true } });
-  return { success: true, created } as const;
+  await db.insert(auditLogs).values({ actorUserId, entityType: "tournament", entityId: tournamentId, action: "generate_brackets", afterValue: { created, groups, skipped, scheduled: true } });
+  return { success: true, created, alreadyGenerated: false, groups, skipped } as const;
 }
 
 export async function createManualMatch(input: { tournamentId: number; categoryId: number; athleteAId: number; athleteBId: number; actorUserId: number }) {

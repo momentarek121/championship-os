@@ -307,3 +307,9 @@
 - [x] Audit every visible route and primary button for a working destination or action. Primary routes return HTTP 200; dedicated bracket, mat, staff, referee, match, registration, and public information actions have explicit destinations.
 - [x] Add automated coverage for direct operation access and route/button smoke expectations. `server/directOperations.test.ts` covers the auth gate removal, hub route, direct middleware, and primary route registration.
 - [x] Run full typecheck, tests, production build, live route/API smoke tests, and publish the direct-operation release. TypeScript, 73 tests, Production build, local unauthenticated dashboard HTTP 200, all public route HTTP 200, GitHub main sync, and the Vercel deployment were verified. Dashboard reads now degrade to an empty view instead of crashing if a secondary database table is unavailable.
+
+- [x] Add automatic bracket generation from eligible registered athletes grouped by weight class, belt, gender, age group, and competition mode. Registration category IDs keep weight, belt, age, gender, and GI/No-Gi mode isolated.
+- [x] Ensure GI and No-Gi brackets remain independent while Both registration creates a registration in each mode. Generation groups by category ID, which is mode-specific for Both registrations.
+- [x] Add organizer controls and bilingual feedback for generating brackets and reporting created matches/skipped groups. Home and Bracket Workspace now report category count, byes, and duplicate-generation protection.
+- [x] Add Vitest coverage for bracket grouping, eligibility, round labels, and duplicate-generation protection. Added `server/automaticBrackets.test.ts`; existing eligibility and bracket tests remain green.
+- [x] Verify bracket generation in the organizer workspace and publish the release. TypeScript, 76 Vitest tests, and Production build pass; the automatic generation flow is published with duplicate protection and correct round labels.

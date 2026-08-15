@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export default function BracketWorkspace() {
   const { user, loading } = useAuth();
   const dashboard = trpc.tournament.dashboard.useQuery(undefined, { enabled: true, retry: false, refetchInterval: 3000 });
-  const generate = trpc.tournament.generateBrackets.useMutation({ onSuccess: result => { toast.success(`${result.created} matches generated`); dashboard.refetch(); }, onError: error => toast.error(error.message) });
+  const generate = trpc.tournament.generateBrackets.useMutation({ onSuccess: result => { if (result.alreadyGenerated) toast.info("Brackets already exist for this tournament"); else { const byeCount = result.groups.reduce((total, group) => total + group.byes, 0); toast.success(`${result.created} matches generated across ${result.groups.length} categories${byeCount ? ` · ${byeCount} bye slot${byeCount === 1 ? "" : "s"}` : ""}`); } dashboard.refetch(); }, onError: error => toast.error(error.message) });
   const updateSlots = trpc.tournament.updateMatchSlots.useMutation({ onSuccess: () => { toast.success("Bracket slots saved"); dashboard.refetch(); }, onError: error => toast.error(error.message) });
   const [mode, setMode] = useState("all");
   const [round, setRound] = useState("all");
