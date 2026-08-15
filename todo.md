@@ -319,3 +319,8 @@
 - [x] Add bilingual UI feedback, unsaved-change state, and save/revert controls for bracket edits. The workspace shows a dirty highlight, Save slot swap, Revert, and error/success toast states.
 - [x] Add Vitest coverage for valid swaps and invalid duplicate/category/mode swaps. `server/matchEditing.test.ts` now covers category/mode compatibility; the full suite passes.
 - [x] Verify drag-and-drop on organizer and Bracket Workspace views, then publish the release. TypeScript, 77 Vitest tests, Production build, and route preview checks completed; screenshot capture was unavailable in the preview environment.
+
+- [x] Add final bracket-tree export to PDF and PNG/JPEG image from the Bracket Workspace. Added filtered SVG-to-PNG and PNG-in-PDF export controls to `/brackets`.
+- [x] Make exports respect the selected GI/No-Gi mode and round filters with readable Arabic/English labels. Export receives the current mode and round-filtered match set and uses safe filenames and labels.
+- [x] Create a reusable Championship OS workflow skill using skill-creator, with concise implementation and QA guidance. Created `/home/ubuntu/skills/championship-os-workflow/SKILL.md`.
+- [x] Validate the skill package and add tests for bracket export data/controls, then publish the release. Skill validator passes; TypeScript, 78 Vitest tests, and Production build pass.
