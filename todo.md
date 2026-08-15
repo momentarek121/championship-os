@@ -343,4 +343,4 @@
 
 - [x] Stop the deployment homepage from waiting indefinitely when the dashboard tRPC request never settles. Home now switches to a bounded fallback after 7 seconds.
 - [x] Add a bounded timeout and a visible retry/offline state for the organizer workspace on mobile and preview URLs. The fallback offers Retry and a direct Port Said registration link.
-- [x] Add regression coverage, rebuild, publish, and verify the dashboard request path on the live deployment. TypeScript, 79 tests, Production build, and live dashboard HTTP 200 checks pass; the new code is ready for GitHub/Vercel publish.
+- [x] Add regression coverage, rebuild, publish, and verify the dashboard request path on the live deployment. TypeScript, 79 tests, Production build, deployment `ac260a1` Ready, the live bundle contains `Connection taking too long` and `Open registration`, and dashboard API returns HTTP 200.
