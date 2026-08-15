@@ -304,3 +304,6 @@
 - [x] Complete the UI/UX review and activate unfinished bracket, match, mat/pool, athlete, and public-facing code paths without Google login. Dedicated operation routes and organizer shortcuts are wired; Google login remains intentionally out of scope.
 - [x] Add or finish automatic athlete data upload/import workflows and bracket-ready validation for PDF/Excel records. Shared Zod contract, preview validation, duplicate detection, bulk persistence, and tests are implemented.
 - [x] Verify the final GitHub, Vercel, and Supabase release state and produce a comprehensive finished-versus-pending report. GitHub commit `a0c864c`, Vercel primary routes/API, Supabase tournament id 7, and deferred Google scope are documented in `FINAL_REVIEW_REPORT_AR.md`.
+- [ ] Reproduce and repair the reported production-wide button failure across the homepage, registration, bracket, match, mat/pool, and import workflows.
+- [ ] Verify every primary button has a working action, visible pending state, success/error feedback, and correct API persistence on the live release.
+- [ ] Re-run the five-note UI/UX, automatic-data, GitHub, Vercel, and Supabase review after the button repair and update the final report.

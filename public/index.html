@@ -23,7 +23,7 @@
       .fallback-error { color: #b91c1c; font-weight: 700; }
       @media (max-width: 640px) { .fallback-grid { grid-template-columns: 1fr; } .fallback-grid .wide { grid-column: auto; } .fallback-card { padding: 22px; } }
     </style>
-    <script type="module" crossorigin src="/assets/index-Bg5sGyLM.js"></script>
+    <script type="module" crossorigin src="/assets/index-CC1oPWLr.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-B3ALTH6x.css">
     <script src="/__manus__/debug-collector.js" defer></script>
   </head>
@@ -95,7 +95,7 @@ Error generating stack: `+l.message+`
           <h1 class="fallback-title">Tournament management, made simple.</h1>
           <p class="fallback-muted">إدارة التسجيل والموازين والبراكت والمباريات والنتائج من مكان واحد.</p>
           <p class="fallback-muted">Loading the workspace… إذا لم تفتح الواجهة، استخدم التسجيل المباشر بالأسفل.</p>
-          <a id="fallback-home-link" href="https://egyptbjj.vercel.app/register/portsaid-bjj-championship" style="display:inline-block;margin-top:18px;background:#d7ff54;color:#07111f;padding:13px 18px;border-radius:10px;font-weight:800;text-decoration:none">Open registration / فتح التسجيل</a>
+          <form id="fallback-registration-form" class="fallback-grid" action="/api/trpc/publicRegistration.submit?batch=1" method="post"><label class="fallback-label wide">Full name / الاسم بالكامل<input class="fallback-input" name="fullName" required placeholder="Ahmed Mohamed" /></label><label class="fallback-label">Email / البريد الإلكتروني<input class="fallback-input" type="email" name="email" placeholder="athlete@email.com" /></label><label class="fallback-label">Phone / الهاتف<input class="fallback-input" name="phone" placeholder="01xxxxxxxxx" /></label><label class="fallback-label">Date of birth / تاريخ الميلاد<input class="fallback-input" type="date" name="dateOfBirth" required /></label><label class="fallback-label">Gender / النوع<select class="fallback-select" name="gender"><option value="male">Male / ذكر</option><option value="female">Female / أنثى</option></select></label><label class="fallback-label">Belt / الحزام<select class="fallback-select" name="belt"><option>No belt</option><option selected>White</option><option>Blue</option><option>Purple</option><option>Brown</option><option>Black</option></select></label><label class="fallback-label">Expected weight KG / الوزن المتوقع<input class="fallback-input" type="number" step="0.1" min="1" name="expectedWeight" required placeholder="76.8" /></label><label class="fallback-label">Competition mode / نوع المنافسة<select class="fallback-select" name="competitionMode"><option value="gi">GI</option><option value="nogi">No-Gi</option><option value="both">Both / كلاهما</option></select></label><div class="wide"><button class="fallback-button" type="submit">Submit registration / إرسال التسجيل</button><div id="fallback-status" class="fallback-status"></div></div></form><a id="fallback-home-link" href="https://egyptbjj.vercel.app/" style="display:inline-block;margin-top:18px;color:#334155;font-weight:700;text-decoration:underline">Back home / العودة للرئيسية</a>
         </section>
       </main>
     </div>
