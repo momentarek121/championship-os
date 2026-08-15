@@ -359,4 +359,4 @@
 
 - [x] Stop the root page from blocking on the dashboard request for the user's mobile browser. `/` now routes directly to ImportCenter and does not query dashboard.
 - [x] Make the root entry immediately show the internal athlete-import workspace or a working navigation shell. ImportCenter opens immediately with Excel/PDF/CSV upload and links to operations and brackets.
-- [x] Test the root and import flow in a real browser session, then republish only after the visible page is confirmed. TypeScript, 79 tests, and Production build pass; Vercel browser verification follows this publish.
+- [x] Test the root and import flow in a real browser session, then republish only after the visible page is confirmed. Deployment 9504e7d is Ready; its URL and `egyptbjj.vercel.app` serve the Import Center bundle with no `/register/:slug`.
