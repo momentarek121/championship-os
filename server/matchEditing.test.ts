@@ -19,4 +19,9 @@ describe("match slot editing", () => {
   it("rejects the same athlete in both slots", () => {
     expect(validateMatchSlots(12, 12)).toEqual({ ok: false, reason: "A match cannot contain the same athlete twice" });
   });
+
+  it("rejects an athlete outside the match category or mode", () => {
+    expect(validateMatchSlots(12, 13, new Set([12, 14]))).toEqual({ ok: false, reason: "Athlete must belong to the match category and competition mode" });
+    expect(validateMatchSlots(12, 14, new Set([12, 14])).ok).toBe(true);
+  });
 });

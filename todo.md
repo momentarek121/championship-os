@@ -313,3 +313,9 @@
 - [x] Add organizer controls and bilingual feedback for generating brackets and reporting created matches/skipped groups. Home and Bracket Workspace now report category count, byes, and duplicate-generation protection.
 - [x] Add Vitest coverage for bracket grouping, eligibility, round labels, and duplicate-generation protection. Added `server/automaticBrackets.test.ts`; existing eligibility and bracket tests remain green.
 - [x] Verify bracket generation in the organizer workspace and publish the release. TypeScript, 76 Vitest tests, and Production build pass; the automatic generation flow is published with duplicate protection and correct round labels.
+
+- [x] Add drag-and-drop player cards for swapping bracket slots before final schedule approval. Bracket Workspace now supports dragging a player card onto any open or occupied slot.
+- [x] Validate manual swaps server-side: no duplicate athlete, no finished-match edits, and category/mode compatibility. The update procedure checks match status and registration category membership, which keeps GI/No-Gi and weight/belt divisions isolated.
+- [x] Add bilingual UI feedback, unsaved-change state, and save/revert controls for bracket edits. The workspace shows a dirty highlight, Save slot swap, Revert, and error/success toast states.
+- [x] Add Vitest coverage for valid swaps and invalid duplicate/category/mode swaps. `server/matchEditing.test.ts` now covers category/mode compatibility; the full suite passes.
+- [x] Verify drag-and-drop on organizer and Bracket Workspace views, then publish the release. TypeScript, 77 Vitest tests, Production build, and route preview checks completed; screenshot capture was unavailable in the preview environment.

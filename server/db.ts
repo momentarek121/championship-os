@@ -499,11 +499,12 @@ export async function reassignMatchMat(input: { matchId: number; matId: number |
 export async function updateMatchSlots(input: { matchId: number; athleteAId: number | null; athleteBId: number | null; actorUserId: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
-  const slotValidation = validateMatchSlots(input.athleteAId, input.athleteBId);
-  if (!slotValidation.ok) throw new Error(slotValidation.reason);
   const existing = await db.select().from(matches).where(eq(matches.id, input.matchId)).limit(1);
   if (!existing[0]) throw new Error("Match not found");
   if (!canEditMatchSlots(existing[0].status)) throw new Error("Finished matches cannot be edited");
+  const allowedAthleteIds = existing[0].categoryId == null ? undefined : new Set((await db.select({ athleteId: registrations.athleteId }).from(registrations).where(and(eq(registrations.tournamentId, existing[0].tournamentId), eq(registrations.categoryId, existing[0].categoryId)))).map(row => row.athleteId));
+  const slotValidation = validateMatchSlots(input.athleteAId, input.athleteBId, allowedAthleteIds);
+  if (!slotValidation.ok) throw new Error(slotValidation.reason);
   await db.update(matches).set({ athleteAId: input.athleteAId, athleteBId: input.athleteBId }).where(eq(matches.id, input.matchId));
   await db.insert(auditLogs).values({ actorUserId: input.actorUserId, entityType: "match", entityId: input.matchId, action: "edit_slots", beforeValue: { athleteAId: existing[0].athleteAId, athleteBId: existing[0].athleteBId }, afterValue: { athleteAId: input.athleteAId, athleteBId: input.athleteBId } });
   return { success: true } as const;
