@@ -344,3 +344,7 @@
 - [x] Stop the deployment homepage from waiting indefinitely when the dashboard tRPC request never settles. Home now switches to a bounded fallback after 7 seconds.
 - [x] Add a bounded timeout and a visible retry/offline state for the organizer workspace on mobile and preview URLs. The fallback offers Retry and a direct Port Said registration link.
 - [x] Add regression coverage, rebuild, publish, and verify the dashboard request path on the live deployment. TypeScript, 79 tests, Production build, deployment `ac260a1` Ready, the live bundle contains `Connection taking too long` and `Open registration`, and dashboard API returns HTTP 200.
+
+- [x] Diagnose the user's inability to reach the deployed website despite HTTP 200 from the sandbox. All public links return HTTP 200 from an independent network check; the remaining failure is device/carrier DNS or a mistyped/old deployment URL.
+- [x] Test the primary Vercel domain, current Vercel deployment URL, managed preview URL, and public registration URL from independent requests. Primary, both deployment URLs, managed domain, and Port Said registration return HTTP 200.
+- [x] Provide one verified public URL with exact mobile instructions, or repair the domain if the primary URL fails externally. Use `https://egyptbjj.vercel.app/`; direct registration is `https://egyptbjj.vercel.app/register/portsaid-bjj-championship`.
