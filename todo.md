@@ -295,12 +295,12 @@
 - [x] Create or restore the real Port Said production tournament row in the active Supabase database; created Supabase tournament id 7 with exact slug `portsaid-bjj-championship` and four configured mats, then verified live lookup returns the real event.
 - [x] Repair the reported public Port Said registration link that does not respond when opened or clicked, then verify the live form in a fresh browser session. Primary `https://egyptbjj.vercel.app/register/portsaid-bjj-championship` now serves the bilingual fallback form in HTML, and its API returns the real Port Said event with HTTP 200; the fallback can submit directly if React boot is delayed.
 - [ ] Enable and save the existing Google OAuth provider in Supabase; current production error is `Unsupported provider: provider is not enabled`.
-- [ ] Complete a dedicated bracket workspace with GI/No-Gi separation, rounds, pools, and manual athlete placement.
-- [ ] Complete a dedicated match workspace with full-screen timer, score controls, winner advancement, and referee-friendly states.
-- [ ] Complete a dedicated mats/pools workspace showing every mat, its active bout, queue, and ordered pool schedule.
-- [ ] Add validated PDF and Excel athlete import with preview, field mapping, duplicate detection, and bracket-ready records.
-- [ ] Refactor and verify the operations code with tests and responsive UI checks, then push the clean release to GitHub and Vercel.
-- [ ] Audit and map all five PDF-note requirements against the current routes, components, server procedures, and database schema.
-- [ ] Complete the UI/UX review and activate unfinished bracket, match, mat/pool, athlete, and public-facing code paths without Google login.
-- [ ] Add or finish automatic athlete data upload/import workflows and bracket-ready validation for PDF/Excel records.
+- [x] Complete a dedicated bracket workspace with GI/No-Gi separation, rounds, pools, and manual athlete placement. Added `/brackets` with automatic generation, mode/round filters, and manual slot saving.
+- [x] Complete a dedicated match workspace with full-screen timer, score controls, winner advancement, and referee-friendly states. `/matches` now exposes the live referee desk with timer, scoring, fullscreen, and winner advancement.
+- [x] Complete a dedicated mats/pools workspace showing every mat, its active bout, queue, and ordered pool schedule. Added `/mats` with live per-mat queues and drag-and-drop reassignment.
+- [x] Add validated PDF and Excel athlete import with preview, field mapping, duplicate detection, and bracket-ready records. Added `.xlsx/.xls/.csv/.pdf` parsing, bilingual aliases, preview validation, duplicate detection, and bulk persistence.
+- [ ] Refactor and verify the operations code with tests and responsive UI checks, then push the clean release to GitHub and Vercel. TypeScript, production build, and 63 Vitest tests pass; commit `a0c864c` is pushed to GitHub, while final Vercel smoke verification remains.
+- [x] Audit and map all five PDF-note requirements against the current routes, components, server procedures, and database schema. Reviewed `FIVE_PAGE_NOTES_COMPLETION_AR.md` and mapped the existing implementation/deferred scope before changes.
+- [x] Complete the UI/UX review and activate unfinished bracket, match, mat/pool, athlete, and public-facing code paths without Google login. Dedicated operation routes and organizer shortcuts are wired; Google login remains intentionally out of scope.
+- [x] Add or finish automatic athlete data upload/import workflows and bracket-ready validation for PDF/Excel records. Shared Zod contract, preview validation, duplicate detection, bulk persistence, and tests are implemented.
 - [ ] Verify the final GitHub, Vercel, and Supabase release state and produce a comprehensive finished-versus-pending report.
