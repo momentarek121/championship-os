@@ -296,3 +296,8 @@
 - [x] Repair the reported public Port Said registration link that does not respond when opened or clicked, then verify the live form in a fresh browser session. Primary `https://egyptbjj.vercel.app/register/portsaid-bjj-championship` now serves the bilingual fallback form in HTML, and its API returns the real Port Said event with HTTP 200; the fallback can submit directly if React boot is delayed.
 - [x] Enable and save the existing Google OAuth provider in Supabase; current production error is `Unsupported provider: provider is not enabled`. Deferred by user scope; the guarded UI now shows a bilingual fallback instead of raw JSON.
 - [x] Verify and, if needed, repair Excel athlete upload from file selection through preview, validation, automatic weight/category assignment, pool placement, persistence, and production deployment. Excel/XLS/CSV parsing, Arabic/English header normalization, preview category/weight/pool assignment, bulk tRPC persistence, TypeScript, 62 tests, Production build, GitHub merge `eb8f471`, and live Vercel bundle markers are verified.
+
+- [x] Add organizer registration-list search by athlete name, belt, and weight category.
+- [x] Add organizer registration-list export to Excel and PDF, respecting active filters and Arabic labels.
+- [x] Add Vitest coverage for registration filtering and export row normalization.
+- [x] Verify export downloads and filtered organizer UI on desktop and mobile, then publish the release. TypeScript, 70 Vitest tests, Production build, server restart, and desktop preview passed; browser download clicks require an authenticated organizer session.
