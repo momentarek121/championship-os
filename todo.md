@@ -352,3 +352,7 @@
 - [x] Remove public athlete registration links and CTAs from the homepage, operations hub, and organizer navigation. App no longer registers public `/register/:slug` routes; operations now points to the internal roster import workspace.
 - [x] Make Excel/PDF/CSV athlete import the primary organizer intake flow with clear Arabic/English instructions and automatic placement. The operations hub card now describes file upload and automatic placement in both languages.
 - [x] Add regression checks that no public registration CTA remains in operating surfaces, then test and publish the change. App/Home/OperationsHub regression checks pass; TypeScript, 79 tests, and Production build pass.
+
+- [x] Verify the user's current Vercel URL is serving the latest production bundle rather than the prior loading-only deployment. The primary domain now serves deployment 340e674 and the new bundle.
+- [x] Push the latest import-only UI and bounded timeout fix to the GitHub branch connected to Vercel. GitHub main and Vercel Production now use 340e674.
+- [x] Confirm the live bundle contains the timeout/Retry state and the internal athlete-import route, then publish a final checkpoint. Live bundle contains Connection taking too long, Open athlete import, and Import athlete roster; `/register/:slug` is absent.
