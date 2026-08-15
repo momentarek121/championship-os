@@ -328,3 +328,7 @@
 - [x] Fix the mobile organizer workspace staying on "Loading tournament workspace…" instead of showing data or a retry state. Home no longer waits for optional Auth loading when dashboard data is ready.
 - [x] Verify dashboard API response, query timeout behavior, and mobile route rendering without login. Direct public routes/API were checked; the loading gate is now dashboard-data based and the error state has Retry.
 - [x] Add regression coverage for bounded loading/error fallback and publish the fix. `server/directOperations.test.ts` now covers the loading gate and retry state; TypeScript, 79 tests, and Production build pass.
+
+- [x] Diagnose why `egyptbjj.vercel.app` still shows the old infinite loading screen after the Home loading-gate fix. The Vercel project was still serving the previous production deployment until GitHub main received commit `2d86859`.
+- [x] Verify the live Vercel deployment commit, bundle marker, dashboard API, and mobile-safe fallback. The new bundle contains the independent-auth loading marker and Retry error state; `/api/trpc/tournament.dashboard` returns HTTP 200.
+- [x] Republish and confirm the primary Vercel domain serves the fixed Home bundle and a non-infinite loading state. Production deployment `2d86859` is Ready, serves `egyptbjj.vercel.app`, and the deployed bundle contains the fix.
